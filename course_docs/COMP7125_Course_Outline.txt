@@ -1,0 +1,82 @@
+Title (Units): COMP7125 Prompt Engineering for Generative AI (3,2,1)
+
+Course Aims:
+This course introduces students to prompt engineering for generative AI systems. With the advancement of large language models (LLMs) and other generative AI technologies, the ability to design effective prompts has become a critical skill. The course aims to provide students with both theoretical understanding and practical skills in crafting prompts that effectively communicate with and control generative AI systems. Students will learn the principles that govern different types of generative AI models, develop techniques to optimize prompt design, and build applications that leverage these powerful systems. Throughout the course, emphasis will be placed on ethical considerations, evaluation methodologies, and the practical applications of prompt engineering in real-world scenarios.
+
+Prerequisite:
+COMP7015 Artificial Intelligence or COMP7025 Artificial Intelligence for Digital Transformation
+
+Course Intended Learning Outcomes (CILOs):
+Upon successful completion of this course, students should be able to:
+No. Course Intended Learning Outcomes (CILOs)
+
+Knowledge
+1 Describe the architecture and functions of generative AI models and explain the fundamental principles of prompt engineering.
+2 Explain various prompt engineering techniques and their applications in different contexts.
+
+Professional Skill
+3 Design and optimize prompts for various generative AI applications, including content generation, information extraction, and decision support systems.
+4 Implement prompt engineering techniques like few-shot prompting, chain-of-thought reasoning, and retrieval-augmented generation.
+
+Transferable Skill
+5 Evaluate the quality of generative AI responses and implement techniques to mitigate hallucinations and biases in outputs.
+
+Attitude
+6 Analyze the ethical considerations and limitations of prompt engineering in real-world applications.
+
+Calendar Description:
+This course introduces the principles and techniques of prompt engineering for generative AI models. Topics include AI model architecture, prompt design fundamentals, content retrieval and integration, prompt ensembling techniques, evaluation methods, and ethical considerations. Students will learn how to design effective prompts, build AI-powered applications, and develop conversational agents and complex workflows. The course emphasizes practical applications of concepts through case studies and hands-on assignments.
+
+Teaching and Learning Activities (TLAs):
+CILOs Type of TLA
+1,2,5,6 Students will learn the fundamental principles and key concepts of prompt engineering via lectures.
+3-6 Students will design and implement effective prompt engineering techniques, evaluate response quality, and assess ethical considerations through tutorials, in-class exercises, and quizzes.
+3-5 Students will work on written assignments to consolidate and apply what they have learned about prompt engineering and generative AI applications.
+
+Assessment:
+No. Assessment Methods Weighting CILOs to be addressed Description of Assessment Tasks
+1 Tutorial and quizzes 20% 3-6 Tutorials and quizzes/in-class exercises are designed to evaluate students' understanding of prompt engineering concepts and their ability to apply these concepts to solve real-world problems.
+2 Assignments 30% 3-5 Assignments will be used to assess students’ proficiency in designing and implementing effective prompts for problem-solving.
+3 Examination 50% 1-3, 5-6 The final examination will comprehensively assess students' knowledge of prompt engineering concepts, ability to analyze prompt effectiveness, and understanding of ethical considerations in generative AI applications.
+
+Assessment Rubrics:
+Criteria Excellent (A) Good (B) Satisfactory (C) Marginal Pass (D) Fail (F)
+Knowledge of prompt engineering concepts Demonstrates exceptional understanding of all prompt engineering concepts, principles, and advanced techniques Demonstrates strong understanding of most prompt engineering concepts with good accuracy Demonstrates adequate understanding of core prompt engineering concepts with minor misconceptions Demonstrates basic understanding of some prompt engineering concepts with limited accuracy Demonstrates minimal understanding of prompt engineering concepts, significant misconceptions
+Prompt design skills Creates highly sophisticated prompts that address all requirements with elegant solutions Creates effective prompts that address most requirements with minor flaws Creates acceptable prompts that address some requirements with some limitations Creates basic prompts that partially address requirements with significant flaws Unable to create effective prompts, demonstrates fundamental misunderstanding of prompt design
+Application of advanced techniques Consistently applies advanced techniques with exceptional results Frequently applies advanced techniques with good results Sometimes applies advanced techniques with acceptable results Rarely applies advanced techniques with poor results Unable to apply advanced techniques or applies them incorrectly
+Evaluation skills Demonstrates exceptional ability to evaluate prompt effectiveness and AI responses Demonstrates strong ability to evaluate prompt effectiveness and AI responses Demonstrates adequate ability to evaluate prompt effectiveness and AI responses Demonstrates limited ability to evaluate prompt effectiveness and AI responses Unable to evaluate prompt effectiveness or AI responses
+Ethical awareness Demonstrates sophisticated awareness of ethical implications with nuanced analysis Demonstrates good awareness of ethical implications with clear reasoning Demonstrates basic awareness of ethical implications with some reasoning Demonstrates minimal awareness of ethical implications with superficial understanding Fails to recognize or address ethical implications of prompt engineering
+
+Course Content and CILOs Mapping:
+Content CILO No. Hours
+I Introduction to Prompt Engineering and Generative AI Fundamentals 1,2,6 11
+II Core Prompt Engineering Techniques 2-5 18
+III Advanced Large Language Model (LLM) Topics 3-5 6
+IV Evaluation, Ethics, and Future Directions 1,5,6 4
+
+References:
+- Berryman, J. & Ziegler, A. (2025). Prompt Engineering for LLMs: The Art and Science of Building Large Language Model-Based Applications. O'Reilly Media.
+- Phoenix, J. & Taylor, M. (2024). Prompt Engineering for Generative AI: Future-Proof Inputs for Reliable AI Outputs. O'Reilly Media.
+- Carnegie Mellon University. (2023). Prompt Engineering. [Course materials from CMU's Prompt Engineering course].
+- Cognitive Class. (2023). Prompt Engineering for Generative AI. [IBM's Cognitive Class course materials].
+
+Course Content:
+I. Introduction to Prompt Engineering and Generative AI Fundamentals
+A. Introduction to Prompt Engineering
+B. Understanding Generative AI Models
+C. Moving from Model Completion to Conversation
+
+II. Core Prompt Engineering Techniques
+A. Designing Generative AI Applications
+B. Prompt Content: Static and Dynamic
+C. Assembling Effective Prompts
+D. Optimizing Model Responses
+
+III. Advanced Large Language Model (LLM) Topics
+A. Building Conversational Agents
+B. LLM Workflows
+
+IV. Evaluation, Ethics, and Future Directions
+A. Evaluating LLM Applications
+B. Ethical Considerations in Prompt Engineering
+C. Multimodal Model
