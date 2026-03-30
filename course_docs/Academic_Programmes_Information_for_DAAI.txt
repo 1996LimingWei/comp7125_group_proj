@@ -1,0 +1,76 @@
+# Master of Science in Data Analytics and Artificial Intelligence
+Programme Director: Prof LEUNG, Yiu Wing
+
+Programme Overview
+The programme focuses on the concepts and practices of information systems and covers three core themes: Data Analytics, Artificial Intelligence and Intelligent Information Systems. Students acquire theoretical knowledge and hands-on practical skills to solve real-world information system problems.
+
+Upon completion, students will achieve the following learning outcomes:
+1. Master the core concepts and methodologies of data analytics, artificial intelligence and intelligent information systems.
+2. Apply relevant technologies to conduct problem-solving and practical applications.
+3. Identify business needs and transform them into feasible information systems via data and AI technologies.
+
+Study Mode & Duration
+1. One-year Full-time: Normal 1 year, maximum 2 years (with approved extension)
+2. Two-year Part-time: Normal 2 years, maximum 3 years (with approved extension)
+
+Total Curriculum Structure
+I Required Courses: 14 units
+II Elective Courses: 15 units
+Total Credit: 29 units
+
+Detailed Requirements
+I Required Courses (14 units)
+COMP7015 Artificial Intelligence - 3 units
+COMP7035 Python for Data Analytics and Artificial Intelligence - 3 units
+COMP7180 Quantitative Methods for Data Analytics and Artificial Intelligence - 3 units
+COMP7530 IT Forum - 1 unit
+COMP7950 IT Project Skills - 1 unit
+COMP7990 Principles and Practices of Data Analytics - 3 units
+
+II Elective Courses (15 units)
+Electives are divided into 4 categories:
+
+1. Data Analytics Stream
+COMP7170 Data Security and Privacy - 3 units
+COMP7260 Special Topics in Data Analytics - 3 units
+COMP7640 Database Systems and Administration - 3 units
+COMP7650 Data Mining and Knowledge Discovery - 3 units
+COMP7810 Business Intelligence - 3 units
+COMP7930 Big Data Analytics - 3 units
+
+2. Artificial Intelligence Stream
+COMP7045 Natural Language Processing and Large Language Models - 3 units
+COMP7055 Computer Vision - 3 units
+COMP7125 Prompt Engineering for Generative AI - 3 units
+COMP7220 Special Topics in Artificial Intelligence - 3 units
+COMP7240 Recommender Systems - 3 units
+COMP7250 Machine Learning - 3 units
+COMP7630 Web Intelligence and Its Applications - 3 units
+COMP7650 Data Mining and Knowledge Discovery - 3 units
+COMP7810 Business Intelligence - 3 units
+
+3. Intelligent Information Systems Stream
+COMP7065 Innovative Laboratory - 3 units
+COMP7190 Special Topics in Intelligent Information Systems - 3 units
+COMP7200 Blockchain Technology - 3 units
+COMP7270 Web and Mobile Programming - 3 units
+COMP7300 Financial Technology - 3 units
+COMP7430 Health Information Systems: Architecture and Technologies - 3 units
+COMP7820 Visual Analytics and Decision Support - 3 units
+COMP7940 Cloud Computing - 3 units
+
+4. MSc Practicum and Research Stream
+COMP7280 MSc Practicum - 3 units
+COMP7960 MSc Research I - 3 units
+COMP7970 MSc Research II - 3 units
+
+5. Other Designated Electives (max 2 courses allowed)
+AIMD7040 Generative AI for Digital Media - 3 units
+AIDM7340 AI for Digital Media - 3 units
+AIDM7880 AI for Social Good: Laws, Ethics, and Methods - 3 units
+COMP7550 IT Project Management - 3 units
+COMP7680 Internet and World Wide Web - 3 units
+COMP7870 IT Innovation Management and Entrepreneurship - 3 units
+COMP7880 E-Business Strategies - 3 units
+
+Remark: Minor revisions to the curriculum may be applied.
