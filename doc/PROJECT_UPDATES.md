@@ -11,6 +11,15 @@
 - On user query, retrieves top-5 most relevant chunks
 - Injects retrieved context into LLM prompt for grounded responses
 
+**Improvements (post-initial implementation):**
+- Manifest-based freshness check: stores a `__manifest__` document (hashes of source files + chunking params + embedding model) and automatically rebuilds the Chroma collection when inputs change.
+- Deterministic chunk metadata: attaches `file_name`, `chunk_id`, and token/word span (`start_token`, `end_token`) to each stored chunk for traceability.
+- Explicit embeddings flow: computes embeddings in-app and passes them into Chroma `add()` and `query()` (via `query_embeddings`) to avoid relying on implicit/unstable embedding-function configuration.
+- Safer retrieval filtering: enforces `doc_type="chunk"` at query time and defensively filters non-chunk results to prevent the manifest record from being returned as context.
+- More transparent prompt context: formats retrieved context with per-chunk headers (source + chunk id + distance) and separates chunks with `---` for easier inspection/debugging.
+- Offline-friendly chunking fallback: uses GPT2 token-based chunking when available, and falls back to whitespace chunking if tokenizer download/init fails.
+- Unit coverage for retrieval safety: adds a lightweight unit test that mocks Chroma + sentence-transformers to verify non-chunk results are filtered out.
+
 **Files:** `src/rag/service.py`
 
 **Test:** Run `python main.py` to see RAG retrieval in action
