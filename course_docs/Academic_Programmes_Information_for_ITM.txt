@@ -1,18 +1,18 @@
-# Master of Science in Data Analytics and Artificial Intelligence
+# Master of Science in Information Technology Management
 Programme Director: Prof LEUNG, Yiu Wing
 
 Programme Introduction
-This programme focuses on the concepts and practices of information systems, covering three core themes: Data Analytics, Artificial Intelligence, and Intelligent Information Systems. Students will acquire solid theoretical knowledge and hands-on practical skills to solve real-world information system problems.
+This programme aims to educate IT managers and professionals who possess technical and management knowledge for designing, developing and managing IT systems. It provides a transformational experience in integrating the technological and managerial sides of IT.
 
 Programme Learning Outcomes
 Upon completion of the programme, students will be able to:
-1. Master core concepts and methodologies of data analytics, artificial intelligence and intelligent information systems
-2. Apply relevant technologies to conduct practical problem-solving and application development
-3. Identify business demands and transform them into feasible information systems via data and AI technologies
+1. Explain the core technical and management concepts and apply these concepts in an integrated manner for IT management;
+2. Explain and apply the current methodologies in some selected areas in IT management (such as IT enterprise management, knowledge and information management, Internet and web technologies and/or business analytics);
+3. Identify business needs and explain the process of transforming business needs into IT systems.
 
 Study Mode & Duration
-1. Full-time (1-year): Standard 1 year; maximum 2 years (with official extension approval)
-2. Part-time (2-year): Standard 2 years; maximum 3 years (with official extension approval)
+1. Full-time (1-year): Standard 1 year; maximum 2 years (with official extension approval). Classes are mainly conducted on weekday evenings or Saturdays, with some daytime classes available for full-time students.
+2. Part-time (2-year): Standard 2 years; maximum 3 years (with official extension approval). Classes are conducted on weekday evenings or Saturdays.
 
 Total Curriculum Credits
 I Required Courses: 14 units
@@ -20,56 +20,62 @@ II Elective Courses: 15 units
 Total: 29 units
 
 Detailed Course Requirements
+Each student is required to complete 29 units as follows: 
+14 units of required courses (if a student has a bachelor’s degree in IT or closely related fields or taken equivalent courses, he/she must substitute the required course “Internet Computing and Programming” by an elective course); 15 units of elective courses (each student must select at least three streams among the four streams and successfully complete at least one course in each selected stream).
+
 I Required Courses (14 units total)
-COMP7015 Artificial Intelligence  3 units
-COMP7035 Python for Data Analytics and Artificial Intelligence  3 units
-COMP7180 Quantitative Methods for Data Analytics and Artificial Intelligence  3 units
+COMP7025 Artificial Intelligence for Digital Transformation  3 units
+COMP7105 Business Data Analysis  3 units
+COMP7510 Internet Computing and Programming  3 units
+COMP7520 Foundations of Management in the IT Context  3 units
 COMP7530 IT Forum  1 unit
 COMP7950 IT Project Skills  1 unit
-COMP7990 Principles and Practices of Data Analytics  3 units
 
 II Elective Courses (15 units total)
-1. Data Analytics Stream
-COMP7170 Data Security and Privacy  3 units
-COMP7260 Special Topics in Data Analytics  3 units
-COMP7640 Database Systems and Administration  3 units
-COMP7650 Data Mining and Knowledge Discovery  3 units
-COMP7810 Business Intelligence  3 units
-COMP7930 Big Data Analytics  3 units
-
-2. Artificial Intelligence Stream
-COMP7045 Natural Language Processing and Large Language Models  3 units
-COMP7055 Computer Vision  3 units
-COMP7125 Prompt Engineering for Generative AI  3 units
-COMP7220 Special Topics in Artificial Intelligence  3 units
-COMP7240 Recommender Systems  3 units
-COMP7250 Machine Learning  3 units
-COMP7630 Web Intelligence and Its Applications  3 units
-COMP7650 Data Mining and Knowledge Discovery  3 units
-COMP7810 Business Intelligence  3 units
-
-3. Intelligent Information Systems Stream
-COMP7065 Innovative Laboratory  3 units
-COMP7190 Special Topics in Intelligent Information Systems  3 units
-COMP7200 Blockchain Technology  3 units
-COMP7270 Web and Mobile Programming  3 units
-COMP7300 Financial Technology  3 units
-COMP7430 Health Information Systems: Architecture and Technologies  3 units
-COMP7820 Visual Analytics and Decision Support  3 units
-COMP7940 Cloud Computing  3 units
-
-4. MSc Practicum and Research Stream
-COMP7280 MSc Practicum  3 units
-COMP7960 MSc Research I  3 units
-COMP7970 MSc Research II  3 units
-
-5. Designated Optional Courses (Maximum 2 courses allowed)
-AIMD7040 Generative AI for Digital Media  3 units
-AIDM7340 AI for Digital Media  3 units
-AIDM7880 AI for Social Good: Laws, Ethics, and Methods  3 units
+1. IT Enterprise Management
+COMP7075 Financial Technology Management  3 units
+COMP7085 Digital Marketing and Analytics  3 units
+COMP7115 Digital Experience Design  3 units
+COMP7540 IT Management: Principles and Practice  3 units
 COMP7550 IT Project Management  3 units
-COMP7680 Internet and World Wide Web  3 units
+COMP7560 Information Systems Auditing  3 units
+COMP7580 Electronic Transformation in Business  3 units
+COMP7770 Special Topics in IT Management  3 units
 COMP7870 IT Innovation Management and Entrepreneurship  3 units
 COMP7880 E-Business Strategies  3 units
 
-Remark: Minor revisions to the curriculum may be implemented without prior notice.
+2. Knowledge and Information Management
+COMP7095 Big Data Management  3 units
+COMP7125 Prompt Engineering for Generative AI  3 units
+COMP7640 Database Systems and Administration  3 units
+COMP7650 Data Mining and Knowledge Discovery  3 units
+COMP7780 Special Topics in Knowledge and Information Management  3 units
+COMP7810 Business Intelligence  3 units
+
+3. Internet and Web Technologies
+COMP7680 Internet and World Wide Web  3 units
+COMP7790 Special Topics in Internet and Web Technologies  3 units
+COMP7850 Information Security Management  3 units
+COMP7940 Cloud Computing  3 units
+COMP7980 Dynamic Web and Mobile Programming  3 units
+
+4. Business Analytics
+COMP7650 Data Mining and Knowledge Discovery  3 units
+COMP7760 Special Topics in Business Analytics  3 units
+COMP7800 Analytic Models in Information Technology Management  3 units
+COMP7810 Business Intelligence  3 units
+COMP7820 Visual Analytics and Decision Support  3 units
+
+5. MSc Project and Research Stream
+COMP7730 MSc Project  3 units
+COMP7960 MSc Research I  3 units
+COMP7970 MSc Research II  3 units
+
+6. Other Optional Courses (Maximum 2 courses allowed)
+Students can take at most two of the following MSc DAAI courses:
+COMP7200 Blockchain Technology  3 units
+COMP7240 Recommender Systems  3 units
+COMP7430 Health Information Systems: Architecture and Technologies  3 units
+
+Remark
+Minor revisions to the curriculum may be implemented without prior notice.
