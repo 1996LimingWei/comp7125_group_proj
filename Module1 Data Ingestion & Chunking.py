@@ -9,6 +9,7 @@ tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
 '''Read All txt.files'''
 
+
 def load_documents(folder_path):
     """
     Reads all .txt files in the specified folder and returns a list of documents
@@ -29,11 +30,13 @@ def load_documents(folder_path):
                 print(f"Failed to read {filename}: {e}")
     return docs
 
+
 # Call the function to read all TXT files in your course_docs folder
-docs = load_documents("./course_docs")  # Relative path, corresponds to your Module1/course_docs
+docs = load_documents("./course_docs")  # Relative path to course documents
 print(f"\nTotal documents read: {len(docs)}")
 
 '''Split Long Documents into Small Snippets'''
+
 
 def chunk_documents(docs, chunk_size=512, overlap=50):
     """
@@ -41,7 +44,7 @@ def chunk_documents(docs, chunk_size=512, overlap=50):
     """
     snippets = []
     chunk_id = 0  # Assign a unique ID to each snippet
-    
+
     for doc in docs:
         # Convert text to computer-readable tokens
         tokens = tokenizer.encode(doc["text"])
@@ -49,7 +52,7 @@ def chunk_documents(docs, chunk_size=512, overlap=50):
         for i in range(0, len(tokens), chunk_size - overlap):
             chunk_tokens = tokens[i:i+chunk_size]
             chunk_text = tokenizer.decode(chunk_tokens)
-            
+
             # Add metadata (filename + ID) to the snippet
             snippets.append({
                 "file_name": doc["file_name"],
@@ -58,6 +61,7 @@ def chunk_documents(docs, chunk_size=512, overlap=50):
             })
             chunk_id += 1
     return snippets
+
 
 # Call the chunking function
 snippets = chunk_documents(docs)
@@ -69,9 +73,11 @@ if snippets:
     print(f"Filename: {snippets[0]['file_name']}")
     print(f"Chunk ID: {snippets[0]['chunk_id']}")
     print(f"First 100 characters of content: {snippets[0]['text'][:100]}...")
-    
-    
+
+
 '''Save Snippets to JSON & Write Loading Function'''
+
+
 def save_snippets(snippets, save_path="./output/snippets.json"):
     """
     Saves the split snippets to a JSON file (for use by other team members)
@@ -82,6 +88,7 @@ def save_snippets(snippets, save_path="./output/snippets.json"):
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(snippets, f, ensure_ascii=False, indent=2)
     print(f"Successfully saved {len(snippets)} snippets to: {save_path}")
+
 
 def load_snippets(load_path="./output/snippets.json"):
     """
@@ -96,6 +103,7 @@ def load_snippets(load_path="./output/snippets.json"):
         print(f"Failed to load: {e}")
         return []
 
+
 # 1. Save snippets to output/snippets.json
 save_snippets(snippets)
 
@@ -107,11 +115,11 @@ loaded_snippets = load_snippets()
 final_snippets = load_snippets()
 
 if final_snippets:
-    print("Module1 Validation Passed!")
+    print("Validation Passed!")
     print(f"Total snippets: {len(final_snippets)}")
     print(f"Source of first snippet: {final_snippets[0]['file_name']}")
     print(f"ID of first snippet: {final_snippets[0]['chunk_id']}")
-    print(f"Preview of first snippet content:\n{final_snippets[0]['text'][:200]}...")
+    print(
+        f"Preview of first snippet content:\n{final_snippets[0]['text'][:200]}...")
 else:
     print("Validation failed, please check previous steps")
-    

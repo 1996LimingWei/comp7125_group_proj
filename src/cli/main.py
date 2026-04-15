@@ -5,14 +5,24 @@ from src.storage.mongo import CosmosDBStorage
 from src.ollama.chat import OllamaChatService
 from src.rag.service import RAGService
 from src.config import load_config, AppConfig
+from src.study_plan.manager import StudyPlanManager
 import os
 import sys
 import logging
 import uuid
+import json
 from typing import Optional
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))))
+
+# Import lexical search
+try:
+    from Module2_LexicalRetrieval import lexical_search
+except ImportError:
+    lexical_search = None
 
 
 # Configure logging
@@ -48,6 +58,8 @@ class HKBUAssistant:
         self.rag_service: Optional[RAGService] = None
         self.chat_service: Optional[OllamaChatService] = None
         self.storage: Optional[CosmosDBStorage] = None
+        self.study_plan_manager: Optional[StudyPlanManager] = None
+        self.snippets: list = []
 
         self._initialize_services()
 
@@ -104,6 +116,29 @@ class HKBUAssistant:
         else:
             self.session_id = str(uuid.uuid4())
 
+        # Initialize Study Plan Manager
+        try:
+            logger.info("Initializing Study Plan Manager...")
+            self.study_plan_manager = StudyPlanManager(
+                retrieval_service=lexical_search
+            )
+            # Load snippets for study plan retrieval
+            self.snippets = self._load_snippets()
+            logger.info(
+                f"Study Plan Manager ready with {len(self.snippets)} snippets")
+        except Exception as e:
+            logger.warning(f"Study Plan Manager initialization failed: {e}")
+            self.study_plan_manager = None
+
+    def _load_snippets(self) -> list:
+        """Load snippets from JSON for study plan retrieval."""
+        try:
+            with open("./output/snippets.json", "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load snippets: {e}")
+            return []
+
     def _get_rag_context(self, query: str) -> str:
         """Get RAG context for the query."""
         if not self.rag_service:
@@ -153,6 +188,10 @@ class HKBUAssistant:
         if not self.chat_service:
             return "Error: Chat service not available. Please ensure Ollama is running."
 
+        # Check if this is a study plan query
+        if self.study_plan_manager and self.study_plan_manager.is_study_plan_query(user_message):
+            return self._handle_study_plan_query(user_message)
+
         # Get RAG context
         rag_context = self._get_rag_context(user_message)
 
@@ -176,6 +215,62 @@ class HKBUAssistant:
 
         return response
 
+    def _handle_study_plan_query(self, user_message: str) -> str:
+        """Handle study plan generation workflow."""
+        if not self.study_plan_manager:
+            return "Study Plan feature is not available."
+
+        state = self.study_plan_manager.conversation_state
+
+        # Start new study plan flow
+        if state == "collecting_constraints" and self.study_plan_manager.user_constraints is None:
+            response = self.study_plan_manager.start_study_plan_flow()
+            self._save_interaction(user_message, response)
+            return response
+
+        # Collect constraints
+        if state in ["collecting_constraints", "ready_to_generate"]:
+            result = self.study_plan_manager.collect_constraint(user_message)
+
+            if result["status"] == "ready":
+                # Ask for confirmation before generating
+                response = result["message"]
+            elif result["status"] == "collecting":
+                response = result["message"]
+            else:
+                response = "Let's continue. " + result["message"]
+
+            self._save_interaction(user_message, response)
+            return response
+
+        # Generate plan when user confirms
+        if state == "ready_to_generate" and user_message.lower() in ["yes", "y", "sure", "ok"]:
+            print(
+                "\nGenerating your personalized study plan... This may take a moment.\n")
+            result = self.study_plan_manager.generate_study_plan(
+                snippets=self.snippets,
+                ollama_client=self.chat_service,
+            )
+
+            if result["status"] == "success":
+                response = f"## Your Personalized Study Plan\n\n{result['study_plan']}"
+                # Reset for next time
+                self.study_plan_manager.reset()
+            else:
+                response = f"Sorry, I couldn't generate the study plan: {result['message']}"
+
+            self._save_interaction(user_message, response)
+            return response
+
+        # Default: treat as regular message
+        return self._continue_study_plan_conversation(user_message)
+
+    def _continue_study_plan_conversation(self, user_message: str) -> str:
+        """Continue study plan constraint collection."""
+        result = self.study_plan_manager.collect_constraint(user_message)
+        self._save_interaction(user_message, result["message"])
+        return result["message"]
+
     def run_interactive(self):
         """Run the interactive CLI chat loop."""
         print("\n" + "=" * 60)
@@ -187,8 +282,11 @@ class HKBUAssistant:
             f"Ollama: {'Available' if self.chat_service and self.chat_service.is_available() else 'Not Available'}")
         print(
             f"Storage: {'Connected' if self.storage and self.storage.is_connected() else 'Not Connected'}")
+        print(
+            f"Study Plan: {'Enabled' if self.study_plan_manager else 'Disabled'}")
         print("-" * 60)
-        print("Type your questions or 'exit' to quit\n")
+        print("Type your questions or 'exit' to quit")
+        print("Try: 'study plan' to generate a personalized study schedule\n")
 
         while True:
             try:
@@ -211,8 +309,12 @@ class HKBUAssistant:
                     print("  exit/quit - Exit the program")
                     print("  new - Start a new session")
                     print("  help - Show this help message")
+                    print("  study plan - Generate a personalized study plan")
                     print()
                     continue
+
+                if user_input.lower() == "study plan":
+                    user_input = "I want to create a study plan"
 
                 # Process the message
                 response = self.chat(user_input)

@@ -1,3 +1,5 @@
 chroma_db/
 .env
-__pycache__/
+__pycache__/.DS_Store
+.qoder/
+.DS_Store
