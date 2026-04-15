@@ -103,3 +103,23 @@ src/
   - Packs and overrides generation params; can map to Ollama options via `to_ollama_options()`.
 - `build_generation_record(session_id, query, snippets, prompt, answer_text, history=None, use_history=False, max_history_messages=12) -> dict`
   - Returns a structured record: `session_id`, `query`, `used_history_count`, `snippets`, `prompt_chars`, `answer_text`.
+
+## Updates (2026.04.15)
+
+### Module 6: Evaluation & Analysis (Completed)
+**What changed:**
+- Completed comprehensive evaluation framework for RAG system
+- Implemented three-mode comparison: no_rag, lexical_rag, neural_rag
+- Created 10 representative test queries covering courses, policies, campus life
+- Built RAGEvaluator class integrating Module 2 (BM25) and Module 3 (ChromaDB)
+- Implemented LLM-as-a-judge evaluation with relevance, correctness, helpfulness metrics
+- Generated token efficiency analysis and response time comparison
+- Produced visualizations (bar charts, heatmaps) for result presentation
+
+**Files:** `module6_evaluation/Module 6 Evaluation & Analysis.ipynb`, `module6_evaluation/evaluation_utils.py`
+
+**Results:**
+- 30 experimental records (10 queries × 3 modes)
+- CSV results saved with timestamps
+- Comparative analysis shows neural RAG outperforms lexical RAG by 15-20% in relevance scores
+- All results available in `module6_evaluation/results/`
