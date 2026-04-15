@@ -3,7 +3,8 @@
 ## Prerequisites
 
 1. **Python 3.11+** installed
-2. **Ollama** installed and running
+2. **Node.js 18+** installed (for Web UI)
+3. **Ollama** installed and running
 
 ---
 
@@ -38,14 +39,57 @@ This creates `./output/snippets.json` with chunked course documents.
 
 ### 4. Run the Application
 
-**Simple Test (Recommended for first run):**
+**Option 1: Web UI (Recommended - Modern Interface)**
+
+The web UI provides a ChatGPT-like interface with a modern design, sidebar navigation, and real-time chat.
+
+**Step 1: Start the Backend (Port 5001)**
 ```bash
-python main.py
+conda activate 7125-hkbu
+python web_app.py
+```
+You should see:
+```
+HKBU Assistant Web Server (CLI Class Wrapper)
+This server uses the CLI's HKBUAssistant class directly.
+Starting server on http://localhost:5001
 ```
 
-**Interactive CLI Mode:**
+**How it works:**
+- Uses the CLI's `HKBUAssistant` class directly
+- Guarantees 100% identical behavior to CLI
+- No code duplication or divergent logic
+- Supports all CLI features including study plan
+
+**Step 2: Start the Frontend (Port 3000)**
 ```bash
+cd web_ui
+npm install  # First time only
+npm start
+```
+You should see:
+- Compiled successfully!
+- Local: http://localhost:3000
+
+**Step 3: Open Browser**
+Navigate to http://localhost:3000
+
+**Features:**
+- **Sidebar**: New chat button, quick actions (Study Plan, Programs), session info
+- **Welcome Screen**: Click suggestion cards or type your question
+- **Chat Interface**: Markdown support, code blocks, typing indicators
+- **Study Plan**: Click "Study Plan" quick action to start constraint collection
+
+**Option 2: CLI Mode**
+```bash
+conda activate 7125-hkbu
 python -m src.cli.main
+```
+
+**Option 3: Simple Test**
+```bash
+conda activate 7125-hkbu
+python main.py
 ```
 
 ### 5. Test Features Individually
@@ -70,9 +114,58 @@ Once running, you can use these commands:
 - `new` - Start a new conversation session
 - `help` - Show available commands
 
-### Step-by-Step Test Flow
+### Web UI Features
 
-Test each module in the integrated CLI:
+The web interface provides a modern ChatGPT-like experience:
+
+- **Sidebar**: New chat, quick actions, session management
+- **Welcome Screen**: Suggested queries to get started
+- **Chat Interface**: Real-time messaging with markdown support
+- **Study Plan**: Interactive constraint collection dialog
+- **Responsive Design**: Works on desktop and mobile
+
+### Step-by-Step Test Flow (Web UI)
+
+#### 1. Test Neural RAG
+Type in the chat:
+```
+What academic programs does HKBU offer?
+```
+Expected: Answer using vector search from ChromaDB with citations
+
+#### 2. Test Conversation Memory
+Follow up with:
+```
+Tell me more about that
+```
+Expected: Maintains context from previous question
+
+#### 3. Test Study Plan Feature
+Click "Study Plan" quick action or type:
+```
+Create a study plan
+```
+Then respond to the prompts:
+- Hours per week: `15`
+- Goals: `I want to pass all courses`
+- Workload: `moderate`
+
+Expected: Multi-turn dialogue collecting constraints, then generates study plan
+
+#### 4. Test Regular Query
+Type:
+```
+What is the tuition fee?
+```
+Expected: Regular RAG answer (not study plan flow)
+
+#### 5. Test New Session
+Click "New Chat" button in sidebar
+Expected: Starts fresh conversation with new session ID
+
+### Step-by-Step Test Flow (CLI)
+
+If using CLI mode (`python -m src.cli.main`):
 
 #### 1. Test Neural RAG
 ```

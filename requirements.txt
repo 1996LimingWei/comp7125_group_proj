@@ -2,6 +2,7 @@ torch>=2.2.0
 numpy<2; python_version < "3.13"
 numpy>=2,<3; python_version >= "3.13"
 flask>=2.3.0
+flask-cors>=4.0.0
 chromadb>=0.4.0
 pymongo>=4.6.0
 python-dotenv>=1.0.0
