@@ -77,9 +77,10 @@ class HKBUAssistant:
                 chroma_path=self.config.rag.chroma_path,
                 chunk_size=self.config.rag.chunk_size,
                 chunk_overlap=self.config.rag.chunk_overlap,
+                ollama_base_url=self.config.ollama.base_url,
             )
             logger.info(
-                f"RAG ready with {self.rag_service.collection.count()} chunks")
+                f"RAG ready with {self.rag_service.count()} chunks")
         except Exception as e:
             logger.warning(f"RAG initialization failed: {e}")
             self.rag_service = None

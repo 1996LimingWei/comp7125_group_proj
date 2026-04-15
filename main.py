@@ -47,8 +47,9 @@ def main():
             chroma_path="./chroma_db",
             chunk_size=config.rag.chunk_size,
             chunk_overlap=config.rag.chunk_overlap,
+            ollama_base_url=config.ollama.base_url,
         )
-        print(f"RAG ready: {rag_service.collection.count()} chunks")
+        print(f"RAG ready: {rag_service.count()} chunks")
     except Exception as e:
         print(f"RAG failed: {e}")
         rag_service = None

@@ -4,24 +4,6 @@ import sys
 from unittest.mock import patch
 
 
-class _FakeArray:
-    def __init__(self, data):
-        self._data = data
-
-    def tolist(self):
-        return self._data
-
-
-class _FakeSentenceTransformer:
-    def __init__(self, model_name):
-        self.model_name = model_name
-
-    def encode(self, texts, show_progress_bar=False):
-        if isinstance(texts, str):
-            texts = [texts]
-        return _FakeArray([[0.0, 0.0] for _ in texts])
-
-
 class _FakeCollection:
     def __init__(self, *, count_value=1, query_result=None):
         self._count_value = count_value
@@ -34,12 +16,6 @@ class _FakeCollection:
         if where != {"doc_type": "chunk"}:
             raise AssertionError(f"Expected where={{'doc_type':'chunk'}}, got {where}")
         return self._query_result
-
-    def add(self, *, documents, ids, metadatas, embeddings):
-        return None
-
-    def get(self, *, ids, include):
-        return {"documents": []}
 
 
 class _FakeClient:
@@ -54,7 +30,7 @@ class _FakeClient:
 
 
 class TestRAGService(unittest.TestCase):
-    def test_retrieve_chunks_filters_manifest_defensively(self):
+    def test_vector_store_filters_non_chunk_results(self):
         query_result = {
             "documents": [["chunk text", "manifest text"]],
             "metadatas": [[
@@ -65,9 +41,6 @@ class TestRAGService(unittest.TestCase):
         }
         fake_collection = _FakeCollection(count_value=2, query_result=query_result)
         fake_client = _FakeClient(fake_collection)
-
-        fake_sentence_transformers = types.ModuleType("sentence_transformers")
-        fake_sentence_transformers.SentenceTransformer = _FakeSentenceTransformer
 
         fake_chromadb = types.ModuleType("chromadb")
         fake_chromadb.PersistentClient = lambda *args, **kwargs: fake_client
@@ -83,23 +56,140 @@ class TestRAGService(unittest.TestCase):
         with patch.dict(
             sys.modules,
             {
-                "sentence_transformers": fake_sentence_transformers,
+                "chromadb": fake_chromadb,
+                "chromadb.config": fake_chromadb_config,
+            },
+        ):
+            from src.rag.vector_store import ChromaVectorStore
+
+            store = ChromaVectorStore(chroma_path="./chroma_db")
+            chunks = store.query(query_embedding=[0.0, 0.0], top_k=5)
+
+            self.assertEqual(len(chunks), 1)
+            self.assertEqual(chunks[0].source, "A.txt")
+            self.assertEqual(chunks[0].chunk_id, 1)
+
+    def test_neural_search_is_exposed(self):
+        fake_collection = _FakeCollection(count_value=0, query_result={})
+        fake_client = _FakeClient(fake_collection)
+
+        fake_chromadb = types.ModuleType("chromadb")
+        fake_chromadb.PersistentClient = lambda *args, **kwargs: fake_client
+
+        fake_chromadb_config = types.ModuleType("chromadb.config")
+
+        class _FakeSettings:
+            def __init__(self, **kwargs):
+                self.kwargs = kwargs
+
+        fake_chromadb_config.Settings = _FakeSettings
+
+        with patch.dict(
+            sys.modules,
+            {
+                "chromadb": fake_chromadb,
+                "chromadb.config": fake_chromadb_config,
+            },
+        ):
+            from src.rag.neural_search import neural_search
+
+            self.assertTrue(callable(neural_search))
+
+    def test_snippet_shape_is_module4_compatible(self):
+        from src.rag.types import RetrievedChunk, retrieved_chunks_to_snippets
+
+        retrieved = [
+            RetrievedChunk(
+                content="hello",
+                source="A.txt",
+                chunk_id=7,
+                start_token=0,
+                end_token=10,
+                distance=0.25,
+            )
+        ]
+        snippets = retrieved_chunks_to_snippets(retrieved, citation_prefix="N", retriever="neural")
+        self.assertEqual(len(snippets), 1)
+        self.assertEqual(snippets[0]["citation_key"], "N0")
+        self.assertEqual(snippets[0]["text"], "hello")
+        self.assertEqual(snippets[0]["meta"]["file_name"], "A.txt")
+        self.assertEqual(snippets[0]["meta"]["chunk_id"], 7)
+        self.assertIn("score", snippets[0]["meta"])
+        self.assertIn("distance", snippets[0]["meta"])
+        self.assertEqual(snippets[0]["meta"]["retriever"], "neural")
+
+    def test_course_code_query_is_reranked(self):
+        fake_collection = _FakeCollection(count_value=0, query_result={})
+        fake_client = _FakeClient(fake_collection)
+
+        fake_chromadb = types.ModuleType("chromadb")
+        fake_chromadb.PersistentClient = lambda *args, **kwargs: fake_client
+
+        fake_chromadb_config = types.ModuleType("chromadb.config")
+
+        class _FakeSettings:
+            def __init__(self, **kwargs):
+                self.kwargs = kwargs
+
+        fake_chromadb_config.Settings = _FakeSettings
+
+        with patch.dict(
+            sys.modules,
+            {
                 "chromadb": fake_chromadb,
                 "chromadb.config": fake_chromadb_config,
             },
         ):
             from src.rag.service import RAGService
+            from src.rag.types import RetrievedChunk
+
+            class _FakeEmbedder:
+                embedding_id = "fake"
+
+                def embed_query(self, text):
+                    return [0.0, 0.0]
+
+            candidates = [
+                RetrievedChunk(
+                    content="General student life info...",
+                    source="Student_Life.txt",
+                    chunk_id=0,
+                    start_token=None,
+                    end_token=None,
+                    distance=0.20,
+                ),
+                RetrievedChunk(
+                    content="Prerequisite:\nCOMP7015 Artificial Intelligence or COMP7025 Artificial Intelligence for Digital Transformation",
+                    source="COMP7125_Course_Outline.txt",
+                    chunk_id=0,
+                    start_token=None,
+                    end_token=None,
+                    distance=0.41,
+                ),
+                RetrievedChunk(
+                    content="Certification of academic assessment info...",
+                    source="Certification_of_Academic_Assessment.txt",
+                    chunk_id=0,
+                    start_token=None,
+                    end_token=None,
+                    distance=0.21,
+                ),
+            ]
+
+            class _FakeStore:
+                def count(self):
+                    return len(candidates)
+
+                def query(self, *, query_embedding, top_k):
+                    return candidates[:top_k]
 
             rag = RAGService(
-                data_dir="./course_docs",
-                chroma_path="./chroma_db",
                 rebuild_if_changed=False,
+                embedder=_FakeEmbedder(),
+                vector_store=_FakeStore(),
             )
-            chunks = rag.retrieve_chunks("test query", k=5)
-
-            self.assertEqual(len(chunks), 1)
-            self.assertEqual(chunks[0].source, "A.txt")
-            self.assertEqual(chunks[0].chunk_id, 1)
+            got = rag.retrieve_chunks("What are the prerequisites for COMP7125?", k=2)
+            self.assertEqual(got[0].source, "COMP7125_Course_Outline.txt")
 
 
 if __name__ == "__main__":

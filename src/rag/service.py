@@ -1,34 +1,21 @@
-"""
-RAG Service - Retrieval-Augmented Generation for HKBU Course Data
-"""
-import os
-import json
 import logging
-import hashlib
-from dataclasses import dataclass
-from typing import List, Dict, Optional, Sequence, Callable, Any
+import re
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
-import chromadb
-from chromadb.config import Settings
-from sentence_transformers import SentenceTransformer
+from .chunking import chunk_documents, load_documents
+from .embeddings import OllamaEmbedder, OllamaEmbeddingConfig, SentenceTransformerEmbedder
+from .manifest import compute_manifest
+from .types import Chunk, RetrievedChunk, retrieved_chunks_to_snippets
+from .vector_store import ChromaVectorStore
 
 logger = logging.getLogger(__name__)
 
-COLLECTION_NAME = "hkbu_knowledge"
-MANIFEST_ID = "__manifest__"
-
-
-@dataclass(frozen=True)
-class RetrievedChunk:
-    content: str
-    source: str
-    chunk_id: Optional[int]
-    start_token: Optional[int]
-    end_token: Optional[int]
-    distance: Optional[float]
+# Detect course codes like COMP7125 / DAAI1234. Used for query-time reranking.
+_COURSE_CODE_RE = re.compile(r"\b[A-Z]{2,4}\d{4}\b")
 
 
 def format_chunks_for_prompt(chunks: Sequence[RetrievedChunk]) -> str:
+    # Convert retrieved chunks into a plain-text context block for prompt injection.
     parts = []
     for c in chunks:
         header = f"Source: {c.source}#chunk:{c.chunk_id} distance:{c.distance}"
@@ -37,8 +24,7 @@ def format_chunks_for_prompt(chunks: Sequence[RetrievedChunk]) -> str:
 
 
 class RAGService:
-    """RAG Service for HKBU campus knowledge."""
-
+    # Orchestration layer: builds/refreshes the vector index and exposes retrieval helpers.
     def __init__(
         self,
         data_dir: str = "./course_docs",
@@ -46,307 +32,169 @@ class RAGService:
         chunk_size: int = 512,
         chunk_overlap: int = 50,
         rebuild_if_changed: bool = True,
+        ollama_base_url: str = "http://localhost:11434",
+        ollama_embed_model: str = "nomic-embed-text",
         embedding_model: Optional[Any] = None,
+        embedder: Optional[Any] = None,
+        vector_store: Optional[Any] = None,
         context_formatter: Optional[Callable[[Sequence[RetrievedChunk]], str]] = None,
     ):
         self.data_dir = data_dir
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-        self.rebuild_if_changed = rebuild_if_changed
-        self._tokenizer = None
+        self.chroma_path = chroma_path
+        self.chunk_size = int(chunk_size)
+        self.chunk_overlap = int(chunk_overlap)
+        self.rebuild_if_changed = bool(rebuild_if_changed)
         self._context_formatter = context_formatter or format_chunks_for_prompt
 
-        self.embedding_model_name = "all-MiniLM-L6-v2"
-        self.embedding_model = embedding_model or SentenceTransformer(self.embedding_model_name)
-
-        # Connect to ChromaDB
-        self.client = chromadb.PersistentClient(
-            path=chroma_path,
-            settings=Settings(anonymized_telemetry=False),
-        )
-
-        # Get or create collection
-        self.collection = self.client.get_or_create_collection(
-            name=COLLECTION_NAME,
-            metadata={"hnsw:space": "cosine"},
-        )
-
-        if self.rebuild_if_changed:
-            self._ensure_knowledge_base()
-        else:
-            if self.collection.count() == 0:
-                logger.info("Building knowledge base...")
-                self._build_knowledge_base()
-            else:
-                logger.info(f"RAG ready: {self.collection.count()} chunks loaded")
-
-    def _ensure_knowledge_base(self):
-        current_manifest = self._compute_manifest()
-        stored_manifest = self._get_stored_manifest()
-
-        if self.collection.count() == 0:
-            logger.info("Building knowledge base...")
-            self._build_knowledge_base(manifest_text=current_manifest)
-            return
-
-        if stored_manifest != current_manifest:
-            logger.info("Knowledge base out of date, rebuilding...")
-            self._recreate_collection()
-            self._build_knowledge_base(manifest_text=current_manifest)
-            return
-
-        logger.info(f"RAG ready: {self.collection.count()} chunks loaded")
-
-    def _recreate_collection(self):
-        try:
-            self.client.delete_collection(name=COLLECTION_NAME)
-        except Exception:
-            pass
-
-        self.collection = self.client.get_or_create_collection(
-            name=COLLECTION_NAME,
-            metadata={"hnsw:space": "cosine"},
-        )
-
-    def _get_stored_manifest(self) -> Optional[str]:
-        try:
-            data = self.collection.get(ids=[MANIFEST_ID], include=["documents"])
-            docs = data.get("documents") or []
-            if docs and docs[0]:
-                return docs[0]
-            return None
-        except Exception:
-            return None
-
-    def _compute_manifest(self) -> str:
-        items = []
-        try:
-            filenames = sorted(
-                f for f in os.listdir(self.data_dir)
-                if f.endswith(".txt")
+        # Embedding backend: default to Ollama embeddings, but allow dependency injection.
+        if embedder is not None:
+            self.embedder = embedder
+        elif embedding_model is not None:
+            self.embedder = SentenceTransformerEmbedder(
+                embedding_model,
+                embedding_id="sentence-transformers",
             )
-        except Exception:
-            filenames = []
-
-        for filename in filenames:
-            file_path = os.path.join(self.data_dir, filename)
-            try:
-                with open(file_path, "rb") as f:
-                    content = f.read()
-                digest = hashlib.sha256(content).hexdigest()
-                items.append({"file_name": filename, "sha256": digest})
-            except Exception:
-                items.append({"file_name": filename, "sha256": None})
-
-        manifest = {
-            "data_dir": os.path.abspath(self.data_dir),
-            "files": items,
-            "chunk_size": self.chunk_size,
-            "chunk_overlap": self.chunk_overlap,
-            "embedding_model": self.embedding_model_name,
-        }
-        return json.dumps(manifest, ensure_ascii=False, sort_keys=True)
-
-    def _load_documents(self) -> List[Dict[str, str]]:
-        """Load all TXT files from the data directory."""
-        docs = []
-        try:
-            filenames = sorted(os.listdir(self.data_dir))
-        except Exception as e:
-            logger.error(f"Failed to list data directory {self.data_dir}: {e}")
-            return []
-
-        for filename in filenames:
-            if filename.endswith(".txt"):
-                file_path = os.path.join(self.data_dir, filename)
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        text = f.read()
-                        docs.append({
-                            "file_name": filename,
-                            "text": text,
-                        })
-                    logger.info(f"Loaded: {filename}")
-                except Exception as e:
-                    logger.error(f"Failed to read {filename}: {e}")
-        return docs
-
-    def _get_tokenizer(self):
-        if self._tokenizer is not None:
-            return self._tokenizer
-        try:
-            from transformers import GPT2TokenizerFast as GPT2Tokenizer
-        except Exception:
-            try:
-                from transformers import GPT2Tokenizer
-            except Exception:
-                self._tokenizer = None
-                return None
-
-        try:
-            self._tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-            return self._tokenizer
-        except Exception:
-            self._tokenizer = None
-            return None
-
-    def _chunk_documents(self, docs: List[Dict[str, str]]) -> List[Dict[str, str]]:
-        """Split documents into chunks using token-based sliding window."""
-        tokenizer = self._get_tokenizer()
-        snippets = []
-        step = max(1, self.chunk_size - self.chunk_overlap)
-        for doc in docs:
-            chunk_index = 0
-            if tokenizer is not None:
-                tokens = tokenizer.encode(doc["text"])
-                for i in range(0, len(tokens), step):
-                    chunk_tokens = tokens[i:i + self.chunk_size]
-                    chunk_text = tokenizer.decode(chunk_tokens)
-
-                    if len(chunk_text.strip()) < 50:
-                        continue
-
-                    chunk_id = hashlib.sha256(
-                        f"{doc['file_name']}:{i}:{i + len(chunk_tokens)}:{self.chunk_size}:{self.chunk_overlap}".encode("utf-8")
-                    ).hexdigest()
-
-                    snippets.append({
-                        "id": chunk_id,
-                        "file_name": doc["file_name"],
-                        "chunk_id": chunk_index,
-                        "start_token": i,
-                        "end_token": i + len(chunk_tokens),
-                        "text": chunk_text.strip(),
-                    })
-                    chunk_index += 1
-                continue
-
-            words = doc["text"].split()
-            for i in range(0, len(words), step):
-                chunk_words = words[i:i + self.chunk_size]
-                chunk_text = " ".join(chunk_words)
-
-                if len(chunk_text.strip()) < 50:
-                    continue
-
-                chunk_id = hashlib.sha256(
-                    f"{doc['file_name']}:{i}:{i + len(chunk_words)}:{self.chunk_size}:{self.chunk_overlap}".encode("utf-8")
-                ).hexdigest()
-
-                snippets.append({
-                    "id": chunk_id,
-                    "file_name": doc["file_name"],
-                    "chunk_id": chunk_index,
-                    "start_token": i,
-                    "end_token": i + len(chunk_words),
-                    "text": chunk_text.strip(),
-                })
-                chunk_index += 1
-
-        return snippets
-
-    def _build_knowledge_base(self, manifest_text: Optional[str] = None):
-        """Build the ChromaDB knowledge base from course documents."""
-        # Load documents
-        docs = self._load_documents()
-        logger.info(f"Loaded {len(docs)} documents")
-
-        # Chunk documents
-        snippets = self._chunk_documents(docs)
-        logger.info(f"Created {len(snippets)} chunks")
-
-        if not snippets:
-            logger.warning("No snippets to index")
-            return
-
-        # Generate embeddings
-        texts = [s["text"] for s in snippets]
-        embeddings = self.embedding_model.encode(texts, show_progress_bar=True).tolist()
-
-        # Store in ChromaDB
-        self.collection.add(
-            documents=texts,
-            ids=[s["id"] for s in snippets],
-            metadatas=[{
-                "doc_type": "chunk",
-                "file_name": s["file_name"],
-                "chunk_id": s["chunk_id"],
-                "start_token": s["start_token"],
-                "end_token": s["end_token"],
-            } for s in snippets],
-            embeddings=embeddings,
-        )
-
-        if manifest_text is None:
-            manifest_text = self._compute_manifest()
-
-        manifest_embedding = self.embedding_model.encode([manifest_text]).tolist()
-        self.collection.add(
-            documents=[manifest_text],
-            ids=[MANIFEST_ID],
-            metadatas=[{"doc_type": "manifest"}],
-            embeddings=manifest_embedding,
-        )
-
-        logger.info(f"Knowledge base built: {len(snippets)} chunks indexed")
-
-    def retrieve_chunks(self, query: str, k: int = 5) -> List[RetrievedChunk]:
-        if self.collection.count() == 0:
-            return []
-
-        query_embedding = self.embedding_model.encode([query]).tolist()[0]
-
-        results = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=min(k, self.collection.count()),
-            include=["documents", "metadatas", "distances"],
-            where={"doc_type": "chunk"},
-        )
-
-        retrieved: List[RetrievedChunk] = []
-        docs = (results.get("documents") or [[]])[0]
-        metas = (results.get("metadatas") or [[]])[0]
-        dists = (results.get("distances") or [[]])[0]
-
-        for i, doc in enumerate(docs):
-            meta = metas[i] if i < len(metas) else {}
-            if meta.get("doc_type", "chunk") != "chunk":
-                continue
-            distance = dists[i] if i < len(dists) else None
-            retrieved.append(RetrievedChunk(
-                content=doc,
-                source=meta.get("file_name", "unknown"),
-                chunk_id=meta.get("chunk_id"),
-                start_token=meta.get("start_token"),
-                end_token=meta.get("end_token"),
-                distance=distance,
+        else:
+            self.embedder = OllamaEmbedder(OllamaEmbeddingConfig(
+                base_url=ollama_base_url,
+                model=ollama_embed_model,
             ))
 
-        return retrieved
+        # Vector store backend (Chroma by default); injectable for tests.
+        self.vector_store = vector_store or ChromaVectorStore(chroma_path=chroma_path)
 
-    def retrieve(self, query: str, k: int = 5) -> List[Dict[str, str]]:
-        """Retrieve top-k relevant chunks for the query."""
-        chunks = self.retrieve_chunks(query, k=k)
-        if not chunks:
-            if self.collection.count() == 0:
-                logger.warning("No chunks in knowledge base")
+        if self.rebuild_if_changed:
+            # Rebuild the index when source docs / params / embedding backend change.
+            self._ensure_index()
+        else:
+            # Only build if empty; do not compute manifest / refresh.
+            if self.vector_store.count() == 0:
+                self._build_index()
+
+    def count(self) -> int:
+        return self.vector_store.count()
+
+    def _rerank_course_query(
+        self,
+        *,
+        query: str,
+        chunks: List[RetrievedChunk],
+        keep_k: int,
+    ) -> List[RetrievedChunk]:
+        # Lightweight hybrid rerank:
+        # - Start with vector candidates
+        # - Boost chunks that mention the detected course code(s) and prerequisite hints
+        codes = set(_COURSE_CODE_RE.findall(query.upper()))
+        if not codes:
+            return chunks[:keep_k]
+
+        query_l = query.lower()
+        wants_prereq = ("prereq" in query_l) or ("prerequisite" in query_l)
+
+        scored: List[tuple[float, int, RetrievedChunk]] = []
+        for idx, c in enumerate(chunks):
+            base = 0.0
+            if isinstance(c.distance, (int, float)):
+                base = 1.0 - float(c.distance)
+
+            src_u = (c.source or "").upper()
+            txt_u = (c.content or "").upper()
+
+            boost = 0.0
+            for code in codes:
+                if code in src_u:
+                    boost += 2.0
+                if code in txt_u:
+                    boost += 3.0
+
+            if "COURSE_OUTLINE" in src_u:
+                boost += 1.0
+
+            if wants_prereq:
+                txt_l = (c.content or "").lower()
+                if ("prereq" in txt_l) or ("prerequisite" in txt_l):
+                    boost += 1.5
+
+            scored.append((base + boost, -idx, c))
+
+        scored.sort(reverse=True)
+        return [c for _, _, c in scored[:keep_k]]
+
+    def retrieve_chunks(self, query: str, k: int = 5) -> List[RetrievedChunk]:
+        # Retrieve top-k chunks. For course-code queries we fetch a larger candidate set
+        # and rerank using simple lexical cues (course code matches, "prerequisite", etc.).
+        total = self.vector_store.count()
+        if total == 0:
             return []
+        query_emb = self.embedder.embed_query(query)
+        k = int(k)
+        has_course_code = bool(_COURSE_CODE_RE.search(query.upper()))
+        if not has_course_code:
+            return self.vector_store.query(query_embedding=query_emb, top_k=k)
 
-        return [
-            {
-                "content": c.content,
-                "source": c.source,
-                "chunk_id": c.chunk_id,
-                "start_token": c.start_token,
-                "end_token": c.end_token,
-                "distance": c.distance,
-            }
-            for c in chunks
-        ]
+        candidate_k = min(max(k * 5, 15), total)
+        candidates = self.vector_store.query(query_embedding=query_emb, top_k=candidate_k)
+        return self._rerank_course_query(query=query, chunks=candidates, keep_k=k)
+
+    def retrieve_snippets(
+        self,
+        query: str,
+        *,
+        k: int = 3,
+        citation_prefix: str = "N",
+        retriever: str = "neural",
+    ) -> List[Dict[str, Any]]:
+        # Return Module 4/6 compatible snippets: [{"citation_key","text","meta"}...]
+        chunks = self.retrieve_chunks(query, k=k)
+        return retrieved_chunks_to_snippets(
+            chunks,
+            citation_prefix=citation_prefix,
+            retriever=retriever,
+        )
 
     def get_context(self, query: str, k: int = 5) -> Optional[str]:
-        """Get formatted context string for LLM prompt."""
+        # Return a string context block (used by the CLI prompt-injection path).
         chunks = self.retrieve_chunks(query, k=k)
         if not chunks:
             return None
         return self._context_formatter(chunks)
+
+    def _ensure_index(self) -> None:
+        # Compute a manifest representing the docs+params+embedding backend.
+        # If it differs from the stored manifest, rebuild the entire index.
+        current = compute_manifest(
+            data_dir=self.data_dir,
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            embedding_id=self.embedder.embedding_id,
+        )
+        stored = self.vector_store.get_manifest()
+        if self.vector_store.count() == 0 or stored is None or stored != current:
+            self.vector_store.reset()
+            self._build_index(manifest_text=current)
+
+    def _build_index(self, manifest_text: Optional[str] = None) -> None:
+        # Full rebuild: load docs -> chunk -> embed -> write to vector store -> store manifest.
+        docs = load_documents(self.data_dir)
+        chunks = chunk_documents(
+            docs,
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+        )
+        if not chunks:
+            return
+
+        embeddings = self.embedder.embed_texts([c.text for c in chunks])
+        self.vector_store.add_chunks(chunks=chunks, embeddings=embeddings)
+
+        if manifest_text is None:
+            manifest_text = compute_manifest(
+                data_dir=self.data_dir,
+                chunk_size=self.chunk_size,
+                chunk_overlap=self.chunk_overlap,
+                embedding_id=self.embedder.embedding_id,
+            )
+        self.vector_store.upsert_manifest(
+            manifest_text=manifest_text,
+            embedding=self.embedder.embed_query(manifest_text),
+        )
