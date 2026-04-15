@@ -1,5 +1,10 @@
 chroma_db/
 .env
-__pycache__/.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
 .qoder/
 .DS_Store
