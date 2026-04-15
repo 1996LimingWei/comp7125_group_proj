@@ -6,6 +6,7 @@ from src.ollama.chat import OllamaChatService
 from src.rag.service import RAGService
 from src.config import load_config, AppConfig
 from src.study_plan.manager import StudyPlanManager
+from src.conversation import ConversationManager
 import os
 import sys
 import logging
@@ -61,6 +62,9 @@ class HKBUAssistant:
         self.study_plan_manager: Optional[StudyPlanManager] = None
         self.snippets: list = []
 
+        # Initialize conversation manager for multi-turn Q&A
+        self.conversation_manager: Optional[ConversationManager] = None
+
         self._initialize_services()
 
     def _initialize_services(self):
@@ -115,6 +119,19 @@ class HKBUAssistant:
             self.session_id = self.storage.create_session()
         else:
             self.session_id = str(uuid.uuid4())
+
+        # Initialize Conversation Manager for multi-turn Q&A
+        try:
+            logger.info("Initializing Conversation Manager...")
+            self.conversation_manager = ConversationManager(
+                system_message=SYSTEM_PROMPT,
+                session_id=self.session_id,
+                max_turns=6,  # Keep last 6 turns (12 messages) for context
+            )
+            logger.info("Conversation Manager ready")
+        except Exception as e:
+            logger.warning(f"Conversation Manager initialization failed: {e}")
+            self.conversation_manager = None
 
         # Initialize Study Plan Manager
         try:
@@ -184,6 +201,7 @@ class HKBUAssistant:
     def chat(self, user_message: str) -> str:
         """
         Process a user message and return an assistant response.
+        Uses ConversationManager for multi-turn Q&A with automatic history truncation.
         """
         if not self.chat_service:
             return "Error: Chat service not available. Please ensure Ollama is running."
@@ -191,6 +209,10 @@ class HKBUAssistant:
         # Check if this is a study plan query
         if self.study_plan_manager and self.study_plan_manager.is_study_plan_query(user_message):
             return self._handle_study_plan_query(user_message)
+
+        # Add user message to conversation manager
+        if self.conversation_manager:
+            self.conversation_manager.add_user_message(user_message)
 
         # Get RAG context
         rag_context = self._get_rag_context(user_message)
@@ -200,8 +222,14 @@ class HKBUAssistant:
         if rag_context:
             system_prompt += rag_context
 
-        # Get conversation history
-        history = self._get_conversation_history()
+        # Get conversation history from ConversationManager (with max_turns truncation)
+        if self.conversation_manager:
+            history = self.conversation_manager.get_history()
+            # Remove system message from history (it's handled separately)
+            history = [m for m in history if m["role"] != "system"]
+        else:
+            # Fallback to storage-based history
+            history = self._get_conversation_history()
 
         # Generate response
         response = self.chat_service.chat(
@@ -210,7 +238,11 @@ class HKBUAssistant:
             system_prompt=system_prompt,
         )
 
-        # Save interaction
+        # Add assistant response to conversation manager
+        if self.conversation_manager:
+            self.conversation_manager.add_assistant_message(response)
+
+        # Save interaction to persistent storage
         self._save_interaction(user_message, response)
 
         return response
