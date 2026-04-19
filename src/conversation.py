@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Sequence
-import re
-from collections import Counter
 
 
 @dataclass(frozen=True)
@@ -437,19 +435,16 @@ class ConversationManager:
         system_message: Optional[str] = None,
         session_id: Optional[str] = None,
         max_turns: int = 6,
-        summary_max_sentences: int = 3,
     ):
         if max_turns < 1:
             raise ValueError("max_turns must be >= 1")
-        if summary_max_sentences < 1:
-            raise ValueError("summary_max_sentences must be >= 1")
 
         self.session_id = session_id
         self.max_turns = max_turns
-        self.system_message = system_message
-        self.summary_max_sentences = summary_max_sentences
         self._messages: List[Message] = []
-        self._summary: str = ""
+
+        if system_message:
+            self._messages.append(Message(role="system", content=system_message))
 
     def add_user_message(self, text: str) -> None:
         self._append(role="user", content=text)
@@ -458,16 +453,7 @@ class ConversationManager:
         self._append(role="assistant", content=text)
 
     def get_history(self) -> List[Dict[str, str]]:
-        history: List[Dict[str, str]] = []
-
-        if self._summary.strip():
-            history.append({
-                "role": "assistant",
-                "content": "Earlier conversation summary:\n" + self._summary.strip(),
-            })
-
-        history.extend([{"role": m.role, "content": m.content} for m in self._messages])
-        return history
+        return [{"role": m.role, "content": m.content} for m in self._messages]
 
     def _append(self, *, role: str, content: str) -> None:
         if not isinstance(content, str):
@@ -477,138 +463,11 @@ class ConversationManager:
         self._truncate()
 
     def _truncate(self) -> None:
+        system_messages = [m for m in self._messages if m.role == "system"]
+        non_system = [m for m in self._messages if m.role != "system"]
+
         max_non_system_messages = self.max_turns * 2
-        if len(self._messages) <= max_non_system_messages:
-            return
+        if len(non_system) > max_non_system_messages:
+            non_system = non_system[-max_non_system_messages:]
 
-        overflow = self._messages[:-max_non_system_messages]
-        self._messages = self._messages[-max_non_system_messages:]
-        self._summary = _summarize_messages(
-            previous_summary=self._summary,
-            messages=overflow,
-            max_sentences=self.summary_max_sentences,
-        )
-
-
-def _summarize_messages(
-    *,
-    previous_summary: str,
-    messages: List[Message],
-    max_sentences: int,
-) -> str:
-    chunks: List[str] = []
-    if isinstance(previous_summary, str) and previous_summary.strip():
-        chunks.append(previous_summary.strip())
-
-    for m in messages:
-        if m.role not in {"user", "assistant"}:
-            continue
-        content = m.content.strip()
-        if not content:
-            continue
-        prefix = "User: " if m.role == "user" else "Assistant: "
-        chunks.append(prefix + content)
-
-    source = "\n".join(chunks).strip()
-    if not source:
-        return ""
-
-    sentences = _split_sentences(source)
-    if not sentences:
-        return _hard_truncate(source, 480)
-
-    token_freq = _token_frequencies(sentences)
-    scored: List[tuple[float, int, str]] = []
-    for idx, s in enumerate(sentences):
-        tokens = _tokenize(s)
-        score = float(sum(token_freq.get(t, 0) for t in tokens))
-        if len(s) < 20:
-            score *= 0.6
-        scored.append((score, idx, s))
-
-    scored.sort(key=lambda x: (x[0], -x[1]), reverse=True)
-
-    selected_idx: set[int] = set()
-    selected: List[tuple[int, str]] = []
-    for _, idx, s in scored:
-        if idx in selected_idx:
-            continue
-        selected_idx.add(idx)
-        selected.append((idx, s))
-        if len(selected) >= max_sentences:
-            break
-
-    selected.sort(key=lambda x: x[0])
-    summary = " ".join(s.strip() for _, s in selected).strip()
-    return _hard_truncate(summary, 600)
-
-
-def _split_sentences(text: str) -> List[str]:
-    normalized = re.sub(r"\s+", " ", text).strip()
-    if not normalized:
-        return []
-
-    parts = re.split(r"(?<=[\.\!\?\。\！\？])\s+", normalized)
-    sentences: List[str] = []
-    for p in parts:
-        s = p.strip()
-        if not s:
-            continue
-        if len(s) > 1000:
-            s = s[:1000].strip()
-        sentences.append(s)
-    return sentences
-
-
-def _tokenize(text: str) -> List[str]:
-    raw = re.findall(r"[A-Za-z0-9']+|[\u4e00-\u9fff]", text.lower())
-    stop = {
-        "the",
-        "a",
-        "an",
-        "and",
-        "or",
-        "to",
-        "of",
-        "in",
-        "on",
-        "for",
-        "with",
-        "is",
-        "are",
-        "was",
-        "were",
-        "be",
-        "been",
-        "it",
-        "this",
-        "that",
-        "i",
-        "you",
-        "we",
-        "they",
-        "he",
-        "she",
-        "my",
-        "your",
-        "our",
-        "their",
-        "me",
-        "us",
-        "them",
-    }
-    return [t for t in raw if t and t not in stop]
-
-
-def _token_frequencies(sentences: List[str]) -> Dict[str, int]:
-    c: Counter[str] = Counter()
-    for s in sentences:
-        c.update(_tokenize(s))
-    return dict(c)
-
-
-def _hard_truncate(text: str, limit: int) -> str:
-    s = text.strip()
-    if len(s) <= limit:
-        return s
-    return s[:limit].rstrip() + "..."
+        self._messages = system_messages[:1] + non_system

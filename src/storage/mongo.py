@@ -166,10 +166,8 @@ class CosmosDBStorage:
 
         # Return summarized format
         return [
-            {
-                "role": "assistant",
-                "content": f"Earlier conversation summary: {len(messages_to_summarize)} messages summarized."
-            }
+            {"role": "system",
+                "content": f"[Earlier conversation summary: {len(messages_to_summarize)} messages summarized]"}
         ] + recent_messages
 
     def create_session(self) -> str:

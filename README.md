@@ -49,13 +49,6 @@ Once running, you can use these commands:
 - `new` - Start a new conversation session
 - `help` - Show available commands
 
-### Conversation Memory
-
-- The CLI keeps recent multi-turn context via a Conversation Manager (default: last 6 turns).
-- When the conversation exceeds the limit, older messages are summarized and the summary is carried forward as part of the context.
-- If Cosmos DB (MongoDB API) storage is configured, conversation history can be reloaded into the Conversation Manager for persistent memory across runs.
-- To resume a specific stored session across runs, set `HKBU_SESSION_ID` before starting the CLI.
-
 ### Sample Test Queries
 
 Try these queries to verify the system is working:
