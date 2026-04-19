@@ -5,8 +5,8 @@ from src.storage.mongo import CosmosDBStorage
 from src.ollama.chat import OllamaChatService
 from src.rag.service import RAGService
 from src.config import load_config, AppConfig
-from src.study_plan.manager import StudyPlanManager
 from src.conversation import ConversationManager
+from src.study_plan.manager import StudyPlanManager
 import os
 import sys
 import logging
@@ -67,6 +67,26 @@ class HKBUAssistant:
 
         self._initialize_services()
 
+    def _hydrate_conversation_history(self):
+        if not self.storage or not self.session_id or not self.conversation_manager:
+            return
+
+        try:
+            history = self.storage.get_conversation_history(self.session_id)
+        except Exception as e:
+            logger.warning(f"Failed to hydrate conversation history: {e}")
+            return
+
+        for item in history:
+            if not isinstance(item, dict):
+                continue
+            role = item.get("role")
+            content = item.get("content")
+            if role == "user" and isinstance(content, str):
+                self.conversation_manager.add_user_message(content)
+            elif role == "assistant" and isinstance(content, str):
+                self.conversation_manager.add_assistant_message(content)
+
     def _initialize_services(self):
         """Initialize all services with error handling."""
         # Initialize RAG Service
@@ -116,7 +136,10 @@ class HKBUAssistant:
             self.storage = None
 
         # Create new session
-        if self.storage:
+        resume_session_id = os.getenv("HKBU_SESSION_ID")
+        if isinstance(resume_session_id, str) and resume_session_id.strip():
+            self.session_id = resume_session_id.strip()
+        elif self.storage:
             self.session_id = self.storage.create_session()
         else:
             self.session_id = str(uuid.uuid4())
@@ -129,6 +152,7 @@ class HKBUAssistant:
                 session_id=self.session_id,
                 max_turns=6,  # Keep last 6 turns (12 messages) for context
             )
+            self._hydrate_conversation_history()
             logger.info("Conversation Manager ready")
         except Exception as e:
             logger.warning(f"Conversation Manager initialization failed: {e}")
@@ -226,11 +250,11 @@ class HKBUAssistant:
         # Get conversation history from ConversationManager (with max_turns truncation)
         if self.conversation_manager:
             history = self.conversation_manager.get_history()
-            # Remove system message from history (it's handled separately)
-            history = [m for m in history if m["role"] != "system"]
         else:
             # Fallback to storage-based history
             history = self._get_conversation_history()
+        if history:
+            history = [m for m in history if m.get("role") != "system"]
 
         # Generate response
         response = self.chat_service.chat(
@@ -333,7 +357,15 @@ class HKBUAssistant:
                     break
 
                 if user_input.lower() == "new":
-                    self.session_id = str(uuid.uuid4())
+                    if self.storage:
+                        self.session_id = self.storage.create_session()
+                    else:
+                        self.session_id = str(uuid.uuid4())
+                    self.conversation_manager = ConversationManager(
+                        system_message=SYSTEM_PROMPT,
+                        session_id=self.session_id,
+                        max_turns=6,
+                    )
                     print(f"New session started: {self.session_id}")
                     continue
 
