@@ -5,6 +5,7 @@ from src.storage.mongo import CosmosDBStorage
 from src.ollama.chat import OllamaChatService
 from src.rag.service import RAGService
 from src.config import load_config, AppConfig
+from src.conversation import ConversationManager
 import os
 import sys
 import logging
@@ -43,6 +44,7 @@ class HKBUAssistant:
         self.config = config
         self.user_id = "cli_user"
         self.session_id: Optional[str] = None
+        self.conversation = ConversationManager(max_turns=6)
 
         # Initialize services with graceful degradation
         self.rag_service: Optional[RAGService] = None
@@ -50,6 +52,26 @@ class HKBUAssistant:
         self.storage: Optional[CosmosDBStorage] = None
 
         self._initialize_services()
+
+    def _hydrate_conversation_history(self):
+        if not self.storage or not self.session_id:
+            return
+
+        try:
+            history = self.storage.get_conversation_history(self.session_id)
+        except Exception as e:
+            logger.warning(f"Failed to hydrate conversation history: {e}")
+            return
+
+        for item in history:
+            if not isinstance(item, dict):
+                continue
+            role = item.get("role")
+            content = item.get("content")
+            if role == "user" and isinstance(content, str):
+                self.conversation.add_user_message(content)
+            elif role == "assistant" and isinstance(content, str):
+                self.conversation.add_assistant_message(content)
 
     def _initialize_services(self):
         """Initialize all services with error handling."""
@@ -103,6 +125,8 @@ class HKBUAssistant:
             self.session_id = self.storage.create_session()
         else:
             self.session_id = str(uuid.uuid4())
+
+        self._hydrate_conversation_history()
 
     def _get_rag_context(self, query: str) -> str:
         """Get RAG context for the query."""
@@ -162,7 +186,7 @@ class HKBUAssistant:
             system_prompt += rag_context
 
         # Get conversation history
-        history = self._get_conversation_history()
+        history = self.conversation.get_history()
 
         # Generate response
         response = self.chat_service.chat(
@@ -170,6 +194,9 @@ class HKBUAssistant:
             conversation_history=history,
             system_prompt=system_prompt,
         )
+
+        self.conversation.add_user_message(user_message)
+        self.conversation.add_assistant_message(response)
 
         # Save interaction
         self._save_interaction(user_message, response)
@@ -202,7 +229,11 @@ class HKBUAssistant:
                     break
 
                 if user_input.lower() == "new":
-                    self.session_id = str(uuid.uuid4())
+                    if self.storage:
+                        self.session_id = self.storage.create_session()
+                    else:
+                        self.session_id = str(uuid.uuid4())
+                    self.conversation = ConversationManager(max_turns=6)
                     print(f"New session started: {self.session_id}")
                     continue
 
