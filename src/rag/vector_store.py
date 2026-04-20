@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-import chromadb
-from chromadb.config import Settings
-
 from .types import Chunk, RetrievedChunk
 from .manifest import extract_manifest_document
 
@@ -16,6 +13,12 @@ MANIFEST_ID = "__manifest__"
 class ChromaVectorStore:
     # Thin wrapper around ChromaDB collection operations used by the RAG pipeline.
     def __init__(self, *, chroma_path: str):
+        try:
+            import chromadb
+            from chromadb.config import Settings
+        except Exception as e:
+            raise ImportError("chromadb is required to use ChromaVectorStore") from e
+
         self._client = chromadb.PersistentClient(
             path=chroma_path,
             settings=Settings(anonymized_telemetry=False),

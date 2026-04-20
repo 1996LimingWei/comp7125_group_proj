@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import List, Optional
 
+import requests
+
 from .chunking import load_documents, chunk_documents
 from .embeddings import OllamaEmbedder, OllamaEmbeddingConfig
 from .manifest import compute_manifest
@@ -11,6 +13,81 @@ from .vector_store import ChromaVectorStore
 
 # Detect course codes like COMP7125 / DAAI1234. Used for query-time reranking.
 _COURSE_CODE_RE = re.compile(r"\b[A-Z]{2,4}\d{4}\b")
+
+MODEL = "gemma3:4b"
+
+
+def ollama_generate(
+    prompt: str,
+    *,
+    model: str = MODEL,
+    base_url: str = "http://localhost:11434",
+    num_predict: int = 180,
+    temperature: float = 0.3,
+    timeout_s: int = 120,
+) -> str:
+    r = requests.post(
+        f"{base_url}/api/generate",
+        json={
+            "model": model,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "num_predict": int(num_predict),
+                "temperature": float(temperature),
+            },
+        },
+        timeout=float(timeout_s),
+    )
+    r.raise_for_status()
+    return str(r.json().get("response") or "").strip()
+
+
+def answer_with_neural_rag(
+    query: str,
+    *,
+    top_k: int = 3,
+    data_dir: str = "./course_docs",
+    chroma_path: str = "./chroma_db",
+    chunk_size: int = 512,
+    chunk_overlap: int = 50,
+    rebuild_if_changed: bool = True,
+    ollama_base_url: str = "http://localhost:11434",
+    ollama_embed_model: str = "nomic-embed-text",
+    model: str = MODEL,
+) -> str:
+    retrieved = neural_search(
+        query,
+        top_k=top_k,
+        data_dir=data_dir,
+        chroma_path=chroma_path,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        rebuild_if_changed=rebuild_if_changed,
+        ollama_base_url=ollama_base_url,
+        ollama_embed_model=ollama_embed_model,
+    )
+    if not retrieved:
+        return "No relevant information found."
+
+    context_parts: List[str] = []
+    for i, c in enumerate(retrieved):
+        source = str(c.source or "Unknown")
+        chunk_id = c.chunk_id if c.chunk_id is not None else "?"
+        header = f"Source: {source}#chunk:{chunk_id}"
+        context_parts.append(f"[Snippet {i+1}] {header}\n{c.content}")
+    context = "\n\n".join(context_parts)
+
+    prompt = f"""Use only the context below to answer the question.
+Cite snippet numbers like [1][2].
+
+Context:
+{context}
+
+Question: {query}
+Answer:"""
+
+    return ollama_generate(prompt, model=model, base_url=ollama_base_url)
 
 
 def neural_search(

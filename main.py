@@ -43,11 +43,13 @@ def main():
     print("\nInitializing RAG service...")
     try:
         rag_service = RAGService(
-            data_dir="./course_docs",
-            chroma_path="./chroma_db",
+            data_dir=config.rag.data_dir,
+            chroma_path=config.rag.chroma_path,
             chunk_size=config.rag.chunk_size,
             chunk_overlap=config.rag.chunk_overlap,
+            rebuild_if_changed=config.rag.rebuild_if_changed,
             ollama_base_url=config.ollama.base_url,
+            ollama_embed_model=config.rag.ollama_embed_model,
         )
         print(f"RAG ready: {rag_service.count()} chunks")
     except Exception as e:

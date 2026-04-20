@@ -95,6 +95,34 @@ class TestRAGService(unittest.TestCase):
 
             self.assertTrue(callable(neural_search))
 
+    def test_answer_with_neural_rag_is_exposed_and_uses_citations(self):
+        from src.rag.types import RetrievedChunk
+
+        with patch("src.rag.neural_search.neural_search") as fake_search, patch(
+            "src.rag.neural_search.ollama_generate"
+        ) as fake_generate:
+            fake_search.return_value = [
+                RetrievedChunk(
+                    content="chunk text",
+                    source="A.txt",
+                    chunk_id=1,
+                    start_token=0,
+                    end_token=10,
+                    distance=0.25,
+                )
+            ]
+            fake_generate.return_value = "answer [1]"
+
+            from src.rag.neural_search import answer_with_neural_rag
+
+            out = answer_with_neural_rag("test query", top_k=1)
+            self.assertEqual(out, "answer [1]")
+
+            called_prompt = fake_generate.call_args.kwargs.get("prompt") or fake_generate.call_args.args[0]
+            self.assertIn("Cite snippet numbers like [1][2].", called_prompt)
+            self.assertIn("[Snippet 1]", called_prompt)
+            self.assertIn("Source: A.txt#chunk:1", called_prompt)
+
     def test_snippet_shape_is_module4_compatible(self):
         from src.rag.types import RetrievedChunk, retrieved_chunks_to_snippets
 
