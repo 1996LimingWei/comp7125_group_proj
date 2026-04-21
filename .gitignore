@@ -1,4 +1,5 @@
 chroma_db/
+chroma_db_verify/
 .env
 __pycache__/
 *.pyc
@@ -8,6 +9,7 @@ __pycache__/
 *.so
 .qoder/
 .DS_Store
+7125.txt
 
 # Node.js / React (web_ui)
 web_ui/node_modules/

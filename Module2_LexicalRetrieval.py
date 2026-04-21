@@ -4,9 +4,14 @@ Implements BM25-based lexical search and RAG pipeline.
 """
 import re
 import json
-import ollama
+import requests
 from rank_bm25 import BM25Okapi
 from typing import List, Tuple
+
+try:
+    import ollama
+except Exception:
+    ollama = None
 
 # Ollama model configuration
 MODEL = "gemma3:4b"
@@ -86,17 +91,34 @@ def ollama_generate(prompt: str) -> str:
     Returns:
         Generated response text
     """
-    response = ollama.generate(
-        model=MODEL,
-        prompt=prompt,
-        stream=False,
-        raw=True,
-        options={
-            "num_predict": 180,
-            "temperature": 0.3
-        }
+    if ollama is not None:
+        response = ollama.generate(
+            model=MODEL,
+            prompt=prompt,
+            stream=False,
+            raw=True,
+            options={
+                "num_predict": 180,
+                "temperature": 0.3
+            }
+        )
+        return response["response"].strip()
+
+    r = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": MODEL,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "num_predict": 180,
+                "temperature": 0.3,
+            },
+        },
+        timeout=120,
     )
-    return response["response"].strip()
+    r.raise_for_status()
+    return str(r.json().get("response") or "").strip()
 
 
 def answer_with_lexical_rag(query: str, snippets: List[dict], top_k: int = 3) -> str:

@@ -93,11 +93,13 @@ class HKBUAssistant:
         try:
             logger.info("Initializing RAG service...")
             self.rag_service = RAGService(
-                data_dir="./course_docs",
+                data_dir=self.config.rag.data_dir,
                 chroma_path=self.config.rag.chroma_path,
                 chunk_size=self.config.rag.chunk_size,
                 chunk_overlap=self.config.rag.chunk_overlap,
+                rebuild_if_changed=self.config.rag.rebuild_if_changed,
                 ollama_base_url=self.config.ollama.base_url,
+                ollama_embed_model=self.config.rag.ollama_embed_model,
             )
             logger.info(
                 f"RAG ready with {self.rag_service.count()} chunks")

@@ -1,0 +1,442 @@
+================================================================================
+RAG 评估实验详细结果
+实验时间: 2026-04-20 15:29:07
+================================================================================
+
+================================================================================
+[2026-04-20T15:29:11.755170]
+Query ID: 1
+Mode: no_rag
+Question: What are the prerequisites for COMP7125?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure. The knowledge base may not cover this question.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 134, Response: 12, Total: 146
+Response Time: 3785.11 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:29:16.684454]
+Query ID: 1
+Mode: lexical_rag
+Question: What are the prerequisites for COMP7125?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this knowledge base covers the prerequisites for COMP7125. The context states that the Master of Science in Data Analytics and Artificial Intelligence programme offers 15 elective courses, including COMP7125 Prompt Engineering for Generative AI, with 3 units. However, it does not list any specific prerequisites for this course 【S15】.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 953, Response: 54, Total: 1007
+Response Time: 4926.61 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:29:23.208467]
+Query ID: 1
+Mode: neural_rag
+Question: What are the prerequisites for COMP7125?
+--------------------------------------------------------------------------------
+Answer:
+The prerequisites for COMP7125 Prompt Engineering for Generative AI are COMP7015 Artificial Intelligence or COMP7025 Artificial Intelligence for Digital Transformation 【N0】.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1196, Response: 21, Total: 1217
+Response Time: 4394.24 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:29:26.999149]
+Query ID: 2
+Mode: no_rag
+Question: When is the final exam for COMP4146?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure and that the knowledge base may not cover it.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 135, Response: 13, Total: 148
+Response Time: 3790.68 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:29:31.905177]
+Query ID: 2
+Mode: lexical_rag
+Question: When is the final exam for COMP4146?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this information is available in the knowledge base. The provided context does not contain information about the final exam schedule for COMP4146. 【S3】 and 【S20】 discuss academic integrity standards and conduct, while 【S21】 outlines student life resources and activities.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1105, Response: 44, Total: 1149
+Response Time: 4902.81 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:29:38.504933]
+Query ID: 2
+Mode: neural_rag
+Question: When is the final exam for COMP4146?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this information is available. The context does not contain details about the final exam for COMP4146. The knowledge base may not cover this specific course.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 949, Response: 30, Total: 979
+Response Time: 4455.14 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:29:42.302710]
+Query ID: 3
+Mode: no_rag
+Question: What is the academic integrity policy?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure. The knowledge base may not cover this question.
+
+--------------------------------------------------------------------------------
+Tokens - Prompt: 134, Response: 12, Total: 146
+Response Time: 3797.78 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:29:47.223031]
+Query ID: 3
+Mode: lexical_rag
+Question: What is the academic integrity policy?
+--------------------------------------------------------------------------------
+Answer:
+The Academic Integrity Online Tutorial (AIOT) is an introduction to promoting academic integrity by increasing students’ awareness of the issues involved. Using pertinent cases as examples, each of the six modules in AIOT provides information and strategies that can be applied to avoid committing academic misconduct unintentionally. Students are required to complete AIOT before the end of the second semester of study. 【S15】
+--------------------------------------------------------------------------------
+Tokens - Prompt: 873, Response: 63, Total: 936
+Response Time: 4917.16 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:29:55.075398]
+Query ID: 3
+Mode: neural_rag
+Question: What is the academic integrity policy?
+--------------------------------------------------------------------------------
+Answer:
+The academic integrity policy at HKBU is outlined in several documents. 【N0】 outlines the core values of academic integrity, which include honesty, trust, fairness, respect, responsibility, and courage. 【N1】 details the standards of conduct and sanctions for violations, including specific types of serious academic misconduct like collusion, ghost writing, and research fraud. The University attaches great importance to academic integrity for students’ holistic development and future careers; all students must maintain academic integrity at all times. 【N2】 also addresses academic integrity through the University Life programme, specifically the UOWs, which aim to educate students on understanding and upholding academic integrity standards.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1129, Response: 101, Total: 1230
+Response Time: 5766.83 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:29:58.711997]
+Query ID: 4
+Mode: no_rag
+Question: How do I apply for a course withdrawal?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure. The knowledge base may not cover this.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 136, Response: 11, Total: 147
+Response Time: 3636.60 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:30:03.335594]
+Query ID: 4
+Mode: lexical_rag
+Question: How do I apply for a course withdrawal?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this knowledge base covers the process for withdrawing from a course. It outlines the Graduate Attributes and course content for COMP7125 Prompt Engineering for Generative AI, but does not detail the procedures for course withdrawals.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1143, Response: 40, Total: 1183
+Response Time: 4620.52 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:30:09.649088]
+Query ID: 4
+Mode: neural_rag
+Question: How do I apply for a course withdrawal?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if the knowledge base covers this. The context provides information about certifications, transcripts, diplomas, and the University Life programme, but it does not detail the process for withdrawing from a course.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 632, Response: 35, Total: 667
+Response Time: 4182.37 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:30:13.284234]
+Query ID: 5
+Mode: no_rag
+Question: How many credits are required for graduation?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure and that the knowledge base may not cover it.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 135, Response: 13, Total: 148
+Response Time: 3634.63 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:30:21.767072]
+Query ID: 5
+Mode: lexical_rag
+Question: How many credits are required for graduation?
+--------------------------------------------------------------------------------
+Answer:
+To determine the total credits required for graduation, we need to consider both the required and elective courses.
+
+The programme requires 14 units of Required Courses 【COMP7015 Artificial Intelligence 3 units, COMP7035 Python for Data Analytics and Artificial Intelligence 3 units, COMP7180 Quantitative Methods for Data Analytics and Artificial Intelligence 3 units, COMP7530 IT Forum 1 unit, COMP7950 IT Project Skills 1 unit, COMP7990 Principles and Practices of Data Analytics 3 units】 and 15 units of Elective Courses 【COMP7170 Data Security and Privacy 3 units, COMP7260 Special Topics in Data Analytics 3 units, COMP7640 Database Systems and Administration 3 units, COMP7650 Data Mining and Knowledge Discovery 3 units, COMP7810 Business Intelligence 3 units, COMP7930 Big Data Analytics 3 units, COMP7045 Natural Language Processing and Large Language Models 3 units, COMP7055 Computer Vision 3 units, COMP7125 Prompt Engineering for Generative AI 3 units, COMP7220 Special Topics in Artificial Intelligence 3 units, COMP7240 Recommender Systems 3 units, COMP7250 Machine Learning 3 units, COMP7630 Web Intelligence and Its Applications 3 units】.
+
+Therefore, the total number of credits required is 14 + 15 = 29 units 【Total: 29 units】.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 937, Response: 185, Total: 1122
+Response Time: 8479.50 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:30:28.433826]
+Query ID: 5
+Mode: neural_rag
+Question: How many credits are required for graduation?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this knowledge base contains the answer to your question. The context discusses Graduate Attributes, Certification of Academic Assessment, Student Life, and Outcomes-Based Teaching and Learning, but it does not specify the number of credits required for graduation.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 938, Response: 42, Total: 980
+Response Time: 4531.13 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:30:32.253685]
+Query ID: 6
+Mode: no_rag
+Question: What electives are recommended for AI concentration?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure. The knowledge base may not cover this question.
+
+--------------------------------------------------------------------------------
+Tokens - Prompt: 135, Response: 12, Total: 147
+Response Time: 3819.86 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:30:38.853819]
+Query ID: 6
+Mode: lexical_rag
+Question: What electives are recommended for AI concentration?
+--------------------------------------------------------------------------------
+Answer:
+The following electives are recommended for the AI concentration:
+
+*   COMP7045 Natural Language Processing and Large Language Models - 3 units 【S14】
+*   COMP7055 Computer Vision - 3 units 【S14】
+*   COMP7125 Prompt Engineering for Generative AI - 3 units 【S14】
+*   COMP7220 Special Topics in Artificial Intelligence - 3 units 【S5】
+*   COMP7240 Recommender Systems - 3 units 【S5】
+*   COMP7250 Machine Learning - 3 units 【S5】
+*   COMP7630 Web Intelligence and Its Applications - 3 units 【S5】
+
+I am not sure if there are any other electives that would be particularly beneficial for the AI concentration, as the knowledge base may not cover it.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1039, Response: 106, Total: 1145
+Response Time: 6597.25 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:30:45.668597]
+Query ID: 6
+Mode: neural_rag
+Question: What electives are recommended for AI concentration?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if the knowledge base covers this. The context provides information on academic advising, student life, and co-curricular learning, but it does not list specific electives recommended for the AI concentration. 【N0】 mentions guidance on major selection and course selection, but it doesn’t detail specific recommendations.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1038, Response: 49, Total: 1087
+Response Time: 4635.94 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:30:49.418448]
+Query ID: 7
+Mode: no_rag
+Question: Where is the main library?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure and that the knowledge base may not cover it.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 133, Response: 13, Total: 146
+Response Time: 3749.85 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:30:53.862640]
+Query ID: 7
+Mode: lexical_rag
+Question: Where is the main library?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this knowledge base covers this question. 【S31】 states that students are also provided with an overview of the key services and facilities of HKBU Library.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1129, Response: 30, Total: 1159
+Response Time: 4441.39 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:31:00.361564]
+Query ID: 7
+Mode: neural_rag
+Question: Where is the main library?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if the knowledge base covers this. 【N0】 states that students are provided with an overview of the key services and facilities of HKBU Library to ensure they are aware of these vital resources.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 687, Response: 37, Total: 724
+Response Time: 4399.14 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:31:04.356260]
+Query ID: 8
+Mode: no_rag
+Question: What student services are available?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure and that the knowledge base may not cover it.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 133, Response: 13, Total: 146
+Response Time: 3994.70 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:31:13.435246]
+Query ID: 8
+Mode: lexical_rag
+Question: What student services are available?
+--------------------------------------------------------------------------------
+Answer:
+Here is a list of student services available at HKBU, according to the provided context:
+
+*   **Student Organisations:** There are over 30 academic societies, around 40 interest clubs, 4 Hall Councils and the International Association 【S22】.
+*   **The Career Centre (CC):** Offers a wide range of services including career planning, skill improvement, and employment matching 【S22】. Specific services include:
+    *   Career Planning and Advising
+    *   Career Education Programmes
+    *   Career & Recruitment Events
+    *   Networking Events
+    *   Exploration Trips
+    *   Skills Empowerment Scheme
+    *   Entrepreneurial Support
+    *   SEN Exclusive Career Support
+*   **Internship Opportunities:** The Career Centre provides access to local and overseas internships, the Metropolitan Attachment Programme (MAP), Global Attachment Opportunities (GAO), and GBA targeted internships, as well as STEM specialised schemes 【S22】.
+*   **BUhub:** An AI-enabled portal for internships, graduate jobs, and on-campus roles 【S22】.
+*   **Postgraduate Exclusive Services:** Includes self-exploration workshops, industry expert consultations, and tailored career training 【S22】.
+*   **Campus Life & Amenities Unit (CLA):** Supports student bodies, manages campus facilities, and participates in university governance 【S14】.
+*   **Counselling and Development Centre:** Provides support for graduate attributes, including knowledge, creativity, skills, learning, communication, and citizenship 【S14】.
+*   **Academic Advising:** Offers guidance on major selection, study skills, and phased study plans, and provides ongoing support for academic progress 【S0】.
+
+I am not sure if the knowledge base covers all student services offered at HKBU.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1094, Response: 227, Total: 1321
+Response Time: 9075.19 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:31:22.719465]
+Query ID: 8
+Mode: neural_rag
+Question: What student services are available?
+--------------------------------------------------------------------------------
+Answer:
+Here are the student services available at HKBU:
+
+*   **The Career Centre (CC):** Offers career planning, skill improvement, and employment matching services, including career talks, CV workshops, and a career fair. They also provide internship opportunities and entrepreneurial support. 【N0】
+*   **Campus Life & Amenities Unit (CLA):** Supports student organisations, manages campus facilities, and participates in university governance. 【N0】
+*   **Counselling and Development Centre (CDC):** Provides counselling and support services, including Student Induction and Guidance, Co-curricular and Extracurricular Activities for Whole Person Education, and support for students with Special Educational Needs (SEN). 【N1】
+*   **Co-curricular Learning (CCL):** Offers seminars, workshops, and experiential learning activities to foster whole person development. Students are required to complete at least 8 CCL items. 【N2】
+*   **Academic Integrity Online Tutorial (AIOT):** An online tutorial to increase students’ awareness of academic integrity issues. 【N2】
+
+I am not sure if there is information about specific funding support available, as this knowledge base may not cover it.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1072, Response: 159, Total: 1231
+Response Time: 7162.12 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:31:26.452663]
+Query ID: 9
+Mode: no_rag
+Question: How can I improve my GPA?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure. The knowledge base may not cover this question.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 134, Response: 12, Total: 146
+Response Time: 3732.68 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:31:30.933241]
+Query ID: 9
+Mode: lexical_rag
+Question: How can I improve my GPA?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this knowledge base covers how to improve your GPA. 【S15】 mentions the use of assessment rubrics to help assess student achievement, but doesn’t provide specific advice on GPA improvement.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 738, Response: 34, Total: 772
+Response Time: 4477.00 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:31:39.078284]
+Query ID: 9
+Mode: neural_rag
+Question: How can I improve my GPA?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure if this knowledge base covers how to improve your GPA. However, it does provide some information related to academic performance. 【N2】 states that “Students will be given an ‘S’ grade for satisfactory completion of the programme or a ‘U’ grade for unsatisfactory performance.” It also mentions that a student who is unable to complete the programme by the deadlines specified in BUniPort will be barred from accessing course grades. The University Life (U-Life) programme, specifically UOW 3: “Get Ready for University Research,” focuses on developing information literacy abilities, which is crucial for academic success. 【N1】 highlights the importance of Co-curricular Learning (CCL) and the Academic Integrity Online Tutorial (AIOT) which aim to foster students’ whole person development and promote academic integrity.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1138, Response: 125, Total: 1263
+Response Time: 5991.32 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:31:42.821277]
+Query ID: 10
+Mode: no_rag
+Question: What should I do if I fail a course?
+--------------------------------------------------------------------------------
+Answer:
+I am not sure and that the knowledge base may not cover it.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 137, Response: 13, Total: 150
+Response Time: 3742.55 ms
+Retrieved Snippets Count: 0
+
+================================================================================
+[2026-04-20T15:31:48.519045]
+Query ID: 10
+Mode: lexical_rag
+Question: What should I do if I fail a course?
+--------------------------------------------------------------------------------
+Answer:
+The course assessment methods outline describes how students are evaluated. 【Assessment】 No. 1, 2, and 3 are all assessment methods with weighting. The final examination (No. 3) assesses CILOs 1-3, 5-6. Tutorials and quizzes (No. 1) and Assignments (No. 2) evaluate students’ understanding and application of prompt engineering concepts and their ability to solve real-world problems. I am not sure what to do if you fail a course beyond the assessment methods provided in this context. The knowledge base may not cover this specific scenario.
+--------------------------------------------------------------------------------
+Tokens - Prompt: 1163, Response: 85, Total: 1248
+Response Time: 5693.30 ms
+Retrieved Snippets Count: 3
+
+================================================================================
+[2026-04-20T15:31:55.258898]
+Query ID: 10
+Mode: neural_rag
+Question: What should I do if I fail a course?
+--------------------------------------------------------------------------------
+Answer:
+A student who is unable to complete the programme by the deadlines specified in the BUniPort will be barred from accessing course grades immediately and will not be allowed to enrol on courses in the following semester until his/her deficiency has been made up. 【Completion Assessment & Consequences】
+--------------------------------------------------------------------------------
+Tokens - Prompt: 867, Response: 48, Total: 915
+Response Time: 4571.73 ms
+Retrieved Snippets Count: 3
+
+
+================================================================================
+实验结束
+================================================================================
