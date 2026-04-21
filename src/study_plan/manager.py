@@ -252,13 +252,10 @@ class StudyPlanManager:
         study_plan_text = ""
         if ollama_client:
             try:
-                response = ollama_client.chat(
-                    model=model,
-                    messages=[{"role": "user", "content": prompt}],
-                    options={"temperature": 0.7, "num_predict": 1024},
+                study_plan_text = ollama_client.chat(
+                    message=prompt,
+                    system_prompt="You are an expert academic advisor at HKBU.",
                 )
-                study_plan_text = response.get(
-                    "message", {}).get("content", "")
             except Exception as e:
                 return {
                     "status": "error",

@@ -231,8 +231,14 @@ class HKBUAssistant:
         if not self.chat_service:
             return "Error: Chat service not available. Please ensure Ollama is running."
 
-        # Check if this is a study plan query
-        if self.study_plan_manager and self.study_plan_manager.is_study_plan_query(user_message):
+        # Check if this is a study plan query OR if we're already in a study plan flow
+        study_plan_active = (
+            self.study_plan_manager and
+            self.study_plan_manager.user_constraints is not None and
+            self.study_plan_manager.conversation_state in [
+                "collecting_constraints", "ready_to_generate"]
+        )
+        if self.study_plan_manager and (study_plan_active or self.study_plan_manager.is_study_plan_query(user_message)):
             return self._handle_study_plan_query(user_message)
 
         # Add user message to conversation manager
@@ -285,23 +291,11 @@ class HKBUAssistant:
             self._save_interaction(user_message, response)
             return response
 
-        # Collect constraints
-        if state in ["collecting_constraints", "ready_to_generate"]:
-            result = self.study_plan_manager.collect_constraint(user_message)
-
-            if result["status"] == "ready":
-                # Ask for confirmation before generating
-                response = result["message"]
-            elif result["status"] == "collecting":
-                response = result["message"]
-            else:
-                response = "Let's continue. " + result["message"]
-
-            self._save_interaction(user_message, response)
-            return response
-
-        # Generate plan when user confirms
-        if state == "ready_to_generate" and user_message.lower() in ["yes", "y", "sure", "ok"]:
+        # Generate plan when user confirms (check BEFORE constraint collection)
+        confirm_keywords = ["yes", "y", "sure", "ok", "go ahead", "generate"]
+        is_confirmed = any(kw in user_message.lower()
+                           for kw in confirm_keywords)
+        if state == "ready_to_generate" and is_confirmed:
             print(
                 "\nGenerating your personalized study plan... This may take a moment.\n")
             result = self.study_plan_manager.generate_study_plan(
@@ -315,6 +309,21 @@ class HKBUAssistant:
                 self.study_plan_manager.reset()
             else:
                 response = f"Sorry, I couldn't generate the study plan: {result['message']}"
+
+            self._save_interaction(user_message, response)
+            return response
+
+        # Collect constraints
+        if state in ["collecting_constraints", "ready_to_generate"]:
+            result = self.study_plan_manager.collect_constraint(user_message)
+
+            if result["status"] == "ready":
+                # Ask for confirmation before generating
+                response = result["message"]
+            elif result["status"] == "collecting":
+                response = result["message"]
+            else:
+                response = "Let's continue. " + result["message"]
 
             self._save_interaction(user_message, response)
             return response

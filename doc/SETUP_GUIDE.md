@@ -10,7 +10,7 @@
 
 ## Quick Start
 
-### 1. Install Ollama and Pull Model
+### 1. Install Ollama and Pull Models
 
 ```bash
 # Install Ollama (macOS)
@@ -19,8 +19,9 @@ brew install ollama
 # Start Ollama service
 ollama serve
 
-# In a new terminal, pull the model
+# In a new terminal, pull the required models
 ollama pull gemma3:4b
+ollama pull nomic-embed-text
 ```
 
 ### 2. Install Dependencies
@@ -79,6 +80,7 @@ Navigate to http://localhost:3000
 - **Welcome Screen**: Click suggestion cards or type your question
 - **Chat Interface**: Markdown support, code blocks, typing indicators
 - **Study Plan**: Click "Study Plan" quick action to start constraint collection
+- **Generation Controls**: Adjust temperature and max_tokens via settings panel
 
 **Option 2: CLI Mode**
 ```bash
@@ -113,6 +115,7 @@ Once running, you can use these commands:
 - `exit` / `quit` - Exit the program
 - `new` - Start a new conversation session
 - `help` - Show available commands
+- `study plan` - Start the study plan workflow
 
 ### Web UI Features
 
@@ -122,42 +125,62 @@ The web interface provides a modern ChatGPT-like experience:
 - **Welcome Screen**: Suggested queries to get started
 - **Chat Interface**: Real-time messaging with markdown support
 - **Study Plan**: Interactive constraint collection dialog
+- **Generation Controls**: Temperature and max_tokens sliders
 - **Responsive Design**: Works on desktop and mobile
 
-### Step-by-Step Test Flow (Web UI)
+### Sample Interaction: COMP7125 Study Plan
 
-#### 1. Test Neural RAG
-Type in the chat:
-```
-What academic programs does HKBU offer?
-```
-Expected: Answer using vector search from ChromaDB with citations
+Try this complete example in CLI or Web UI:
 
-#### 2. Test Conversation Memory
-Follow up with:
+**You:**
 ```
-Tell me more about that
+I am study COMP7125 Prompt Engineering for Generative AI as an itm student. I am struggled with this course, please help me make a study plan.
 ```
-Expected: Maintains context from previous question
 
-#### 3. Test Study Plan Feature
-Click "Study Plan" quick action or type:
+**Assistant:**
 ```
-Create a study plan
-```
-Then respond to the prompts:
-- Hours per week: `15`
-- Goals: `I want to pass all courses`
-- Workload: `moderate`
+I'll help you create a personalized study plan!
 
-Expected: Multi-turn dialogue collecting constraints, then generates study plan
+To get started, please tell me:
+1. How many hours per week can you dedicate to studying?
+2. What are your main goals? (e.g., 'pass all courses', 'achieve high grades', 'balance work and study')
+3. What's your preferred workload? (light/moderate/heavy)
+4. Which days of the week work best for you?
+5. Any specific courses you want to focus on?
+```
 
-#### 4. Test Regular Query
-Type:
+**You:**
 ```
-What is the tuition fee?
+20 hours per week, high grade, moderate workload, Monday Wednesday Friday
 ```
-Expected: Regular RAG answer (not study plan flow)
+
+**Assistant:**
+```
+Great! Here's what I've collected:
+
+📅 Available Hours: 20 hours/week
+🎯 Goals: high grade
+⚡ Workload Preference: moderate
+📆 Preferred Days: Monday, Wednesday, Friday
+📚 Focus Courses: COMP7125
+
+Shall I generate your study plan now? (yes/no)
+```
+
+**You:**
+```
+yes
+```
+
+**Assistant:** Generates a personalized weekly study schedule for COMP7125 based on the course outline, including time allocations for lectures, self-study, assignments, and revision.
+
+#### 4. Test Generation Controls
+In the Web UI settings panel:
+- Adjust temperature slider (0.3 for factual, 0.7 for creative)
+- Adjust max_tokens slider (512 for short, 1024 for detailed)
+
+Expected: Responses adapt to parameter changes
+
 
 #### 5. Test New Session
 Click "New Chat" button in sidebar
